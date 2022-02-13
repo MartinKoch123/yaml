@@ -2,12 +2,13 @@ classdef Tests < matlab.unittest.TestCase
 
     methods(Test)    
         function parse(testCase)
-            
+
             tests = {
                 "", []
-                "test", "test"
+                "test # comment", "test"
                 "1.23", 1.23
                 "True", true
+                "1", 1
                 "[1, 2, True, test]", {1, 2, true, "test"}
                 "{}", struct()
                 sprintf("12!: 1\n12$: 2"), struct("x12_", 1, "x12__1", 2)
@@ -54,6 +55,38 @@ classdef Tests < matlab.unittest.TestCase
                 func = @() yaml.emit(data);
                 testCase.verifyError(func, errorId);
             end
+        end
+
+        function writeFile(testCase)
+
+            data = struct("a", 1.23, "b", "test");
+            expected = sprintf("{a: 1.23, b: test}\r\n");
+
+            testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");
+
+            yaml.writeFile(testPath, data)
+            actual = string(fileread(testPath));
+
+            testCase.verifyEqual(actual, expected);
+
+            delete(testPath)
+            rmdir(fileparts(testPath))
+
+        end
+
+        function readFile(testCase)
+
+            data = struct("a", 1.23, "b", "test");
+
+            testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");
+
+            yaml.writeFile(testPath, data)
+            actual = yaml.readFile(testPath);
+
+            testCase.verifyEqual(actual, data);
+
+            delete(testPath)
+            rmdir(fileparts(testPath))
         end
     end
 end

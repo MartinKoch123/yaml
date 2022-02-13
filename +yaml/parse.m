@@ -1,4 +1,7 @@
 function result = parse(s)
+%PARSE Parse YAML string
+%   Parse a string in YAML format and convert it to appropriate
+%   data types.
 
 arguments
     s (1, 1) string
@@ -12,7 +15,14 @@ try
 catch cause
     MException("parseYaml:Failed", "Failed to parse YAML string.").addCause(cause).throw
 end
+try
 result = convert(rootNode);
+catch exception
+    if string(exception.identifier).startsWith("parseYaml") 
+        error(exception.identifier, exception.message);
+    end
+    exception.rethrow;
+end
 
 end
 

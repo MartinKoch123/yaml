@@ -1,11 +1,11 @@
 function result = emit(data)
+%EMIT Convert data to YAML string
 
 arguments
     data
 end
 
-import yaml.initSnakeYaml
-initSnakeYaml
+yaml.initSnakeYaml
 import('org.yaml.snakeyaml.DumperOptions');
 import('org.yaml.snakeyaml.Yaml');
 
