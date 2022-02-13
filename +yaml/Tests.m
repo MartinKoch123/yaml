@@ -2,7 +2,6 @@ classdef Tests < matlab.unittest.TestCase
 
     methods(Test)    
         function parse(testCase)
-
             tests = {
                 "", []
                 "test # comment", "test"
@@ -22,10 +21,22 @@ classdef Tests < matlab.unittest.TestCase
             end
         end
 
-        function emit(testCase)
+        function parse_unsupportedTypes(testCase)
+            notSupportedTests = {
+                "2022-2-13T01:01:01", "parse:TypeNotSupported"
+            };
 
+            for iTest = 1:size(notSupportedTests, 2)                
+                [str, errorId] = notSupportedTests{iTest, :};
+                func = @() yaml.parse(str);
+                testCase.verifyError(func, errorId);
+            end
+        end
+
+        function emit(testCase)
             tests = {
                 "test", sprintf("test\r\n")
+                'test', sprintf("test\r\n")
                 't', sprintf("t\r\n")
                 1.23, sprintf("1.23\r\n")
                 int32(1), sprintf("1\r\n")
@@ -36,18 +47,20 @@ classdef Tests < matlab.unittest.TestCase
                 {1, {2, 3}}, sprintf("- 1.0\r\n- [2.0, 3.0]\r\n")
             };
 
-            for iTest = 1:height(tests)                
+            for iTest = 1:size(tests, 2)                
                 [data, expected] = tests{iTest, :};
                 actual = yaml.emit(data);
                 testCase.verifyEqual(actual, expected);
             end
+        end
 
+        function emit_unsupportedTypes(testCase)
             notSupportedTests = {
-                'test', "emit:ArrayNotSupported"
                 [1, 2], "emit:ArrayNotSupported"
                 ["one", "two"], "emit:ArrayNotSupported"
                 [false, true], "emit:ArrayNotSupported"
                 {1, 2; 3, 4}, "emit:NonVectorCellNotSupported"
+                datetime(2022, 2, 13), "emit:TypeNotSupported"
             };
 
             for iTest = 1:height(notSupportedTests)                
@@ -58,7 +71,6 @@ classdef Tests < matlab.unittest.TestCase
         end
 
         function writeFile(testCase)
-
             data = struct("a", 1.23, "b", "test");
             expected = sprintf("{a: 1.23, b: test}\r\n");
 
@@ -71,11 +83,9 @@ classdef Tests < matlab.unittest.TestCase
 
             delete(testPath)
             rmdir(fileparts(testPath))
-
         end
 
         function readFile(testCase)
-
             data = struct("a", 1.23, "b", "test");
 
             testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");

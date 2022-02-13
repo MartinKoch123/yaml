@@ -8,16 +8,17 @@ arguments
 end
 
 yaml.initSnakeYaml
-import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.*;
 try
     rootNode = Yaml().load(s);
 catch cause
-    MException("parseYaml:Failed", "Failed to parse YAML string.").addCause(cause).throw
+    MException("parse:Failed", "Failed to parse YAML string.").addCause(cause).throw
 end
+
 try
-result = convert(rootNode);
+    result = convert(rootNode);
 catch exception
-    if string(exception.identifier).startsWith("parseYaml") 
+    if string(exception.identifier).startsWith("parse") 
         error(exception.identifier, exception.message);
     end
     exception.rethrow;
@@ -38,7 +39,7 @@ function result = convert(node)
         case "java.util.ArrayList"
             result = convertList(node);
         otherwise
-            error("parseYaml:TypeNotSupported", "Data type '%s' is not supported.", class(node))
+            error("parse:TypeNotSupported", "Data type '%s' is not supported.", class(node))
     end
 end
 

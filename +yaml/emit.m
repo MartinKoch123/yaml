@@ -6,21 +6,30 @@ arguments
 end
 
 yaml.initSnakeYaml
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.*;
 
-javaData = convert(data);
+try
+    javaData = convert(data);
+catch exception
+    if string(exception.identifier).startsWith("emit") 
+        error(exception.identifier, exception.message);
+    end
+    exception.rethrow;
+end
 options = DumperOptions();
 options.setLineBreak(javaMethod('getPlatformLineBreak', 'org.yaml.snakeyaml.DumperOptions$LineBreak'));
 result = Yaml(options).dump(javaData);
 result = string(result);
+
 end
 
 function result = convert(data)
     if iscell(data)
         result = convertCell(data);
+    elseif ischar(data) && isvector(data)
+        result = java.lang.String(data);
     elseif ~isscalar(data)
-        error("emit:ArrayNotSupported", "Non-cell arrays are not supported.")
+        error("emit:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
     elseif isstruct(data)
         result = convertStruct(data);
     elseif isfloat(data)
@@ -29,7 +38,7 @@ function result = convert(data)
         result = java.lang.Integer(data);
     elseif islogical(data)
         result = java.lang.Boolean(data);
-    elseif ischar(data) || isstring(data)
+    elseif isstring(data)
         result = java.lang.String(data);
     else
         error("emit:TypeNotSupported", "Data type '%s' is not supported.", class(data))
@@ -46,7 +55,7 @@ end
 
 function result = convertCell(data)
     if ~isvector(data)
-        error("emit:NonVectorCellNotSupported", "Non-vector cell arrays are not supported.")
+        error("emit:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
     end
     result = java.util.ArrayList();
     for i = 1:length(data)
