@@ -14,7 +14,7 @@ classdef Tests < matlab.unittest.TestCase
                 sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), struct("a", "test", "b", 123, "c", struct("d", "test2", "e", false))
             };
 
-            for iTest = 1:height(tests)                
+            for iTest = 1:size(tests, 1)                
                 [s, expected] = tests{iTest, :};
                 actual = yaml.parse(s);
                 testCase.verifyEqual(actual, expected);
@@ -22,12 +22,12 @@ classdef Tests < matlab.unittest.TestCase
         end
 
         function parse_unsupportedTypes(testCase)
-            notSupportedTests = {
+            tests = {
                 "2022-2-13T01:01:01", "parse:TypeNotSupported"
             };
 
-            for iTest = 1:size(notSupportedTests, 2)                
-                [str, errorId] = notSupportedTests{iTest, :};
+            for iTest = 1:size(tests, 1)                
+                [str, errorId] = tests{iTest, :};
                 func = @() yaml.parse(str);
                 testCase.verifyError(func, errorId);
             end
@@ -47,7 +47,7 @@ classdef Tests < matlab.unittest.TestCase
                 {1, {2, 3}}, sprintf("- 1.0\r\n- [2.0, 3.0]\r\n")
             };
 
-            for iTest = 1:size(tests, 2)                
+            for iTest = 1:size(tests, 1)                
                 [data, expected] = tests{iTest, :};
                 actual = yaml.emit(data);
                 testCase.verifyEqual(actual, expected);
@@ -55,7 +55,7 @@ classdef Tests < matlab.unittest.TestCase
         end
 
         function emit_unsupportedTypes(testCase)
-            notSupportedTests = {
+            tests = {
                 [1, 2], "emit:ArrayNotSupported"
                 ["one", "two"], "emit:ArrayNotSupported"
                 [false, true], "emit:ArrayNotSupported"
@@ -63,8 +63,8 @@ classdef Tests < matlab.unittest.TestCase
                 datetime(2022, 2, 13), "emit:TypeNotSupported"
             };
 
-            for iTest = 1:height(notSupportedTests)                
-                [data, errorId] = notSupportedTests{iTest, :};
+            for iTest = 1:size(tests, 1)                
+                [data, errorId] = tests{iTest, :};
                 func = @() yaml.emit(data);
                 testCase.verifyError(func, errorId);
             end
