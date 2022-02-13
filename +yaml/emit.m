@@ -6,8 +6,8 @@ arguments
 end
 
 yaml.initSnakeYaml
-import('org.yaml.snakeyaml.DumperOptions');
-import('org.yaml.snakeyaml.Yaml');
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 javaData = convert(data);
 options = DumperOptions();
@@ -17,12 +17,12 @@ result = string(result);
 end
 
 function result = convert(data)
-    if isstruct(data)
-        result = convertStruct(data);
-    elseif iscell(data)
+    if iscell(data)
         result = convertCell(data);
     elseif ~isscalar(data)
         error("emit:ArrayNotSupported", "Non-cell arrays are not supported.")
+    elseif isstruct(data)
+        result = convertStruct(data);
     elseif isfloat(data)
         result = java.lang.Double(data);
     elseif isinteger(data)

@@ -7,9 +7,8 @@ arguments
     s (1, 1) string
 end
 
-import yaml.initSnakeYaml
-initSnakeYaml
-import('org.yaml.snakeyaml.Yaml');
+yaml.initSnakeYaml
+import org.yaml.snakeyaml.Yaml;
 try
     rootNode = Yaml().load(s);
 catch cause
@@ -59,6 +58,6 @@ end
 function result = convertList(list)
     result = cell(1, list.size());
     for i = 1:list.size()
-        result{i} = convert(list.get(i-1));
+        result{i} = convert(list.get(i - 1));
     end
 end
