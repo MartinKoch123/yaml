@@ -5,7 +5,7 @@ arguments
     data
 end
 
-yaml.initSnakeYaml
+initSnakeYaml
 import org.yaml.snakeyaml.*;
 
 try
@@ -60,5 +60,12 @@ function result = convertCell(data)
     result = java.util.ArrayList();
     for i = 1:length(data)
         result.add(convert(data{i}));
+    end
+end
+
+function initSnakeYaml
+    snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
+    if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
+        javaaddpath(snakeYamlFile);
     end
 end

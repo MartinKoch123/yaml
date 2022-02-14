@@ -4,10 +4,10 @@ function result = parse(s)
 %   data types.
 
 arguments
-    s (1, 1) string
+    s {mustBeTextScalar}
 end
 
-yaml.initSnakeYaml
+initSnakeYaml
 import org.yaml.snakeyaml.*;
 try
     rootNode = Yaml().load(s);
@@ -60,5 +60,12 @@ function result = convertList(list)
     result = cell(1, list.size());
     for i = 1:list.size()
         result{i} = convert(list.get(i - 1));
+    end
+end
+
+function initSnakeYaml
+    snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
+    if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
+        javaaddpath(snakeYamlFile);
     end
 end
