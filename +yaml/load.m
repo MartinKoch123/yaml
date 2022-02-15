@@ -4,7 +4,7 @@ function result = load(s)
 %   data types.
 
 arguments
-    s {mustBeNonzeroLengthText}
+    s (1, 1) string
 end
 
 initSnakeYaml

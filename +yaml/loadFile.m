@@ -3,7 +3,7 @@ function result = loadFile(filePath)
 %   Read a YAML file and convert the content to appropriate data types.
 
 arguments
-    filePath (1, 1) string {mustBeFile}
+    filePath (1, 1) string
 end
 
 content = string(fileread(filePath));

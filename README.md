@@ -1,5 +1,5 @@
 # yaml
-[YAML](https://yaml.org/) parser and emitter for MATLAB. 
+[YAML](https://yaml.org/) parser and emitter for MATLAB R2019b or newer. 
 Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and inspired by [yamlmatlab](https://code.google.com/archive/p/yamlmatlab/).
 
 ## Example
@@ -40,3 +40,9 @@ Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and 
 ```
 ## Installation
 Extract files and add them to your MATLAB search path.
+
+## Notes
+- Requires R2019b or newer.
+- Dates and `null` are not supported.
+- Non-scalar, non-cell arrays are not supported to avoid the scalar/list ambiguity. Use 1D cells instead.
+- Set the output style for `yaml.dump` and `yaml.dumpFile` with the `"Style"` name-value argument using either `"auto"`, `"block"` `"flow"`. Example: `yaml.dump(data, "Style", "block")`

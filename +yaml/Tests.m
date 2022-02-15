@@ -23,7 +23,7 @@ classdef Tests < matlab.unittest.TestCase
         function load_unsupportedTypes(testCase)
             tests = {
                 "2022-2-13T01:01:01", "load:TypeNotSupported"
-                "", "MATLAB:validators:mustBeNonzeroLengthText"
+                "", "load:TypeNotSupported"
             };
 
             for iTest = 1:size(tests, 1)                
