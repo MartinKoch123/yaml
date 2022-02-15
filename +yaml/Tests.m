@@ -70,6 +70,24 @@ classdef Tests < matlab.unittest.TestCase
             end
         end
 
+        function dump_style(testCase)
+            data.a = 1;
+            data.b = {3, {4}};
+
+            tests = {
+                "block", sprintf("a: 1.0\r\nb:\r\n- 3.0\r\n- - 4.0\r\n")
+                "flow", sprintf("{a: 1.0, b: [3.0, [4.0]]}\r\n")
+                "auto", sprintf("a: 1.0\r\nb:\r\n- 3.0\r\n- [4.0]\r\n")
+            };
+            
+            for iTest = 1:size(tests, 1)
+                [style, expected] = tests{iTest, :};
+                actual = yaml.dump(data, "Style", style);
+                testCase.verifyEqual(actual, expected);
+            end
+
+        end
+
         function dumpFile(testCase)
             data = struct("a", 1.23, "b", "test");
             expected = sprintf("{a: 1.23, b: test}\r\n");

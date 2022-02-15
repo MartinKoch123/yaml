@@ -1,13 +1,14 @@
-function dumpFile(filePath, data)
+function dumpFile(filePath, data, options)
 % DUMPFILE Write data to YAML file.
 
 arguments
     filePath (1, 1) string {mustBeNonzeroLengthText}
     data
+    options.Style {mustBeMember(options.Style, ["flow", "block", "auto"])} = "auto"
 end
 
 % Create YAML string.
-yamlString = yaml.dump(data);
+yamlString = yaml.dump(data, "Style", options.Style);
 
 % Create folder.
 folder = fileparts(filePath);

@@ -1,8 +1,9 @@
-function result = dump(data)
+function result = dump(data, options)
 %DUMP Convert data to YAML string
 
 arguments
     data
+    options.Style {mustBeMember(options.Style, ["flow", "block", "auto"])} = "auto"
 end
 
 initSnakeYaml
@@ -16,9 +17,8 @@ catch exception
     end
     exception.rethrow;
 end
-options = DumperOptions();
-options.setLineBreak(javaMethod('getPlatformLineBreak', 'org.yaml.snakeyaml.DumperOptions$LineBreak'));
-result = Yaml(options).dump(javaData);
+dumperOptions = getDumperOptions(options.Style);
+result = Yaml(dumperOptions).dump(javaData);
 result = string(result);
 
 end
@@ -68,4 +68,16 @@ function initSnakeYaml
     if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
         javaaddpath(snakeYamlFile);
     end
+end
+
+function opts = getDumperOptions(style)
+    import org.yaml.snakeyaml.*;
+    opts = DumperOptions();
+    opts.setLineBreak(javaMethod('getPlatformLineBreak', 'org.yaml.snakeyaml.DumperOptions$LineBreak'));
+    
+    classes = opts.getClass.getClasses;
+    styleFields = classes(4).getDeclaredFields();
+    styleIndex = find(style == ["flow", "block", "auto"]);
+    opts.setDefaultFlowStyle(styleFields(styleIndex).get([]));
+    
 end
