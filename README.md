@@ -3,7 +3,7 @@
 Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and inspired by [yamlmatlab](https://code.google.com/archive/p/yamlmatlab/).
 
 ## Example
-### Parse and emit
+### Load and dump
 ```Matlab
 >> data.a = 1.23;
 >> data.b = "hello";
