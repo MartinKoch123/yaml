@@ -1,10 +1,10 @@
-function result = parse(s)
-%PARSE Parse YAML string
+function result = load(s)
+%LOAD Parse YAML string
 %   Parse a string in YAML format and convert it to appropriate
 %   data types.
 
 arguments
-    s {mustBeTextScalar}
+    s {mustBeNonzeroLengthText}
 end
 
 initSnakeYaml
@@ -12,16 +12,16 @@ import org.yaml.snakeyaml.*;
 try
     rootNode = Yaml().load(s);
 catch cause
-    MException("parse:Failed", "Failed to parse YAML string.").addCause(cause).throw
+    MException("load:Failed", "Failed to load YAML string.").addCause(cause).throw
 end
 
 try
     result = convert(rootNode);
-catch exception
-    if string(exception.identifier).startsWith("parse") 
-        error(exception.identifier, exception.message);
+catch exc
+    if exc.identifier == "load:TypeNotSupported"
+        error(exc.identifier, exc.message);
     end
-    exception.rethrow;
+    exc.rethrow;
 end
 
 end
@@ -29,6 +29,9 @@ end
 function result = convert(node)
     switch class(node)
         case "double"
+            if isempty(node)
+                error("load:TypeNotSupported", "'null' is not supported.")
+            end
             result = node;
         case "char"
             result = string(node);
@@ -39,7 +42,7 @@ function result = convert(node)
         case "java.util.ArrayList"
             result = convertList(node);
         otherwise
-            error("parse:TypeNotSupported", "Data type '%s' is not supported.", class(node))
+            error("load:TypeNotSupported", "Data type '%s' is not supported.", class(node))
     end
 end
 

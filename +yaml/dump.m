@@ -1,5 +1,5 @@
-function result = emit(data)
-%EMIT Convert data to YAML string
+function result = dump(data)
+%DUMP Convert data to YAML string
 
 arguments
     data
@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.*;
 try
     javaData = convert(data);
 catch exception
-    if string(exception.identifier).startsWith("emit") 
+    if string(exception.identifier).startsWith("dump") 
         error(exception.identifier, exception.message);
     end
     exception.rethrow;
@@ -29,7 +29,7 @@ function result = convert(data)
     elseif ischar(data) && isvector(data)
         result = java.lang.String(data);
     elseif ~isscalar(data)
-        error("emit:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
+        error("dump:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
     elseif isstruct(data)
         result = convertStruct(data);
     elseif isfloat(data)
@@ -41,7 +41,7 @@ function result = convert(data)
     elseif isstring(data)
         result = java.lang.String(data);
     else
-        error("emit:TypeNotSupported", "Data type '%s' is not supported.", class(data))
+        error("dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
     end
 end
 
@@ -55,7 +55,7 @@ end
 
 function result = convertCell(data)
     if ~isvector(data)
-        error("emit:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
+        error("dump:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
     end
     result = java.util.ArrayList();
     for i = 1:length(data)

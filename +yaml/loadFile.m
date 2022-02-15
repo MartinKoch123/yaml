@@ -1,5 +1,5 @@
-function result = readFile(filePath)
-% READFILE Read YAML file.
+function result = loadFile(filePath)
+% LOADFILE Read YAML file.
 %   Read a YAML file and convert the content to appropriate data types.
 
 arguments
@@ -7,6 +7,6 @@ arguments
 end
 
 content = string(fileread(filePath));
-result = yaml.parse(content);
+result = yaml.load(content);
 
 end

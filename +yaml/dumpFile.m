@@ -1,5 +1,5 @@
-function writeFile(filePath, data)
-% WRITEFILE Write data to YAML file.
+function dumpFile(filePath, data)
+% DUMPFILE Write data to YAML file.
 
 arguments
     filePath (1, 1) string {mustBeNonzeroLengthText}
@@ -7,7 +7,7 @@ arguments
 end
 
 % Create YAML string.
-yamlString = yaml.emit(data);
+yamlString = yaml.dump(data);
 
 % Create folder.
 folder = fileparts(filePath);

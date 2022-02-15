@@ -1,9 +1,8 @@
 classdef Tests < matlab.unittest.TestCase
 
     methods(Test)    
-        function parse(testCase)
+        function load(testCase)
             tests = {
-                "", []
                 "test # comment", "test"
                 "1.23", 1.23
                 "True", true
@@ -16,24 +15,25 @@ classdef Tests < matlab.unittest.TestCase
 
             for iTest = 1:size(tests, 1)                
                 [s, expected] = tests{iTest, :};
-                actual = yaml.parse(s);
+                actual = yaml.load(s);
                 testCase.verifyEqual(actual, expected);
             end
         end
 
-        function parse_unsupportedTypes(testCase)
+        function load_unsupportedTypes(testCase)
             tests = {
-                "2022-2-13T01:01:01", "parse:TypeNotSupported"
+                "2022-2-13T01:01:01", "load:TypeNotSupported"
+                "", "MATLAB:validators:mustBeNonzeroLengthText"
             };
 
             for iTest = 1:size(tests, 1)                
                 [str, errorId] = tests{iTest, :};
-                func = @() yaml.parse(str);
+                func = @() yaml.load(str);
                 testCase.verifyError(func, errorId);
             end
         end
 
-        function emit(testCase)
+        function dump(testCase)
             tests = {
                 "test", sprintf("test\r\n")
                 'test', sprintf("test\r\n")
@@ -49,34 +49,34 @@ classdef Tests < matlab.unittest.TestCase
 
             for iTest = 1:size(tests, 1)                
                 [data, expected] = tests{iTest, :};
-                actual = yaml.emit(data);
+                actual = yaml.dump(data);
                 testCase.verifyEqual(actual, expected);
             end
         end
 
-        function emit_unsupportedTypes(testCase)
+        function dump_unsupportedTypes(testCase)
             tests = {
-                [1, 2], "emit:ArrayNotSupported"
-                ["one", "two"], "emit:ArrayNotSupported"
-                [false, true], "emit:ArrayNotSupported"
-                {1, 2; 3, 4}, "emit:NonVectorCellNotSupported"
-                datetime(2022, 2, 13), "emit:TypeNotSupported"
+                [1, 2], "dump:ArrayNotSupported"
+                ["one", "two"], "dump:ArrayNotSupported"
+                [false, true], "dump:ArrayNotSupported"
+                {1, 2; 3, 4}, "dump:NonVectorCellNotSupported"
+                datetime(2022, 2, 13), "dump:TypeNotSupported"
             };
 
             for iTest = 1:size(tests, 1)                
                 [data, errorId] = tests{iTest, :};
-                func = @() yaml.emit(data);
+                func = @() yaml.dump(data);
                 testCase.verifyError(func, errorId);
             end
         end
 
-        function writeFile(testCase)
+        function dumpFile(testCase)
             data = struct("a", 1.23, "b", "test");
             expected = sprintf("{a: 1.23, b: test}\r\n");
 
             testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");
 
-            yaml.writeFile(testPath, data)
+            yaml.dumpFile(testPath, data)
             actual = string(fileread(testPath));
 
             testCase.verifyEqual(actual, expected);
@@ -85,13 +85,13 @@ classdef Tests < matlab.unittest.TestCase
             rmdir(fileparts(testPath))
         end
 
-        function readFile(testCase)
+        function loadFile(testCase)
             data = struct("a", 1.23, "b", "test");
 
             testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");
 
-            yaml.writeFile(testPath, data)
-            actual = yaml.readFile(testPath);
+            yaml.dumpFile(testPath, data)
+            actual = yaml.loadFile(testPath);
 
             testCase.verifyEqual(actual, data);
 
