@@ -35,20 +35,21 @@ classdef Tests < matlab.unittest.TestCase
 
         function dump(testCase)
             tests = {
-                "test", sprintf("test\r\n")
-                'test', sprintf("test\r\n")
-                't', sprintf("t\r\n")
-                1.23, sprintf("1.23\r\n")
-                int32(1), sprintf("1\r\n")
-                true, sprintf("true\r\n")
-                struct("a", "test", "b", 123), sprintf("{a: test, b: 123.0}\r\n")
-                {1, "test"}, sprintf("[1.0, test]\r\n")
-                {1; "test"}, sprintf("[1.0, test]\r\n")
-                {1, {2, 3}}, sprintf("- 1.0\r\n- [2.0, 3.0]\r\n")
+                "test", "test"
+                'test', "test"
+                't', "t"
+                1.23, "1.23"
+                int32(1), "1"
+                true, "true"
+                struct("a", "test", "b", 123), "{a: test, b: 123.0}"
+                {1, "test"}, "[1.0, test]"
+                {1; "test"}, "[1.0, test]"
+                {1, {2, 3}}, sprintf("- 1.0\n- [2.0, 3.0]")
             };
 
             for iTest = 1:size(tests, 1)                
                 [data, expected] = tests{iTest, :};
+                expected = expected + newline;
                 actual = yaml.dump(data);
                 testCase.verifyEqual(actual, expected);
             end
@@ -75,9 +76,9 @@ classdef Tests < matlab.unittest.TestCase
             data.b = {3, {4}};
 
             tests = {
-                "block", sprintf("a: 1.0\r\nb:\r\n- 3.0\r\n- - 4.0\r\n")
-                "flow", sprintf("{a: 1.0, b: [3.0, [4.0]]}\r\n")
-                "auto", sprintf("a: 1.0\r\nb:\r\n- 3.0\r\n- [4.0]\r\n")
+                "block", sprintf("a: 1.0\nb:\n- 3.0\n- - 4.0\n")
+                "flow", sprintf("{a: 1.0, b: [3.0, [4.0]]}\n")
+                "auto", sprintf("a: 1.0\nb:\n- 3.0\n- [4.0]\n")
             };
             
             for iTest = 1:size(tests, 1)
@@ -90,23 +91,29 @@ classdef Tests < matlab.unittest.TestCase
 
         function dumpFile(testCase)
             data = struct("a", 1.23, "b", "test");
-            expected = sprintf("{a: 1.23, b: test}\r\n");
+            expected = "{a: 1.23, b: test}";
+            if ispc 
+                expected = expected + sprintf("\r\n");
+            else
+                expected = expected + sprintf("\n");
+            end
 
-            testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");
+            testPath = tempname;
 
             yaml.dumpFile(testPath, data)
-            actual = string(fileread(testPath));
+            fid = fopen(testPath);
+            actual = string(fscanf(fid, "%c"));
+            fclose(fid);
 
             testCase.verifyEqual(actual, expected);
 
             delete(testPath)
-            rmdir(fileparts(testPath))
         end
 
         function loadFile(testCase)
             data = struct("a", 1.23, "b", "test");
 
-            testPath = fullfile(fileparts(which("yaml.Tests")), "folder/test.yaml");
+            testPath = tempname;
 
             yaml.dumpFile(testPath, data)
             actual = yaml.loadFile(testPath);
@@ -114,7 +121,6 @@ classdef Tests < matlab.unittest.TestCase
             testCase.verifyEqual(actual, data);
 
             delete(testPath)
-            rmdir(fileparts(testPath))
         end
     end
 end

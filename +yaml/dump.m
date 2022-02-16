@@ -72,12 +72,9 @@ end
 
 function opts = getDumperOptions(style)
     import org.yaml.snakeyaml.*;
-    opts = DumperOptions();
-    opts.setLineBreak(javaMethod('getPlatformLineBreak', 'org.yaml.snakeyaml.DumperOptions$LineBreak'));
-    
+    opts = DumperOptions();    
     classes = opts.getClass.getClasses;
     styleFields = classes(4).getDeclaredFields();
     styleIndex = find(style == ["flow", "block", "auto"]);
     opts.setDefaultFlowStyle(styleFields(styleIndex).get([]));
-    
 end

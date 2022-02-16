@@ -17,7 +17,7 @@ if strlength(folder) > 1 && ~isfolder(folder)
 end
 
 % Write file.
-[fid, msg] = fopen(filePath, "w");
+[fid, msg] = fopen(filePath, "wt");
 if fid == -1
     error(msg)
 end
