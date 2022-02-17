@@ -12,13 +12,13 @@ import org.yaml.snakeyaml.*;
 try
     rootNode = Yaml().load(s);
 catch cause
-    MException("load:Failed", "Failed to load YAML string.").addCause(cause).throw
+    MException("yaml:load:Failed", "Failed to load YAML string.").addCause(cause).throw
 end
 
 try
     result = convert(rootNode);
 catch exc
-    if exc.identifier == "load:TypeNotSupported"
+    if exc.identifier == "yaml:load:TypeNotSupported"
         error(exc.identifier, exc.message);
     end
     exc.rethrow;
@@ -31,7 +31,7 @@ function result = convert(node)
         case "double"
             if ~isempty(node)
                 result = node;
-            else
+            else 
                 result = yaml.Null;
             end
         case "char"
@@ -42,8 +42,11 @@ function result = convert(node)
             result = convertMap(node);
         case "java.util.ArrayList"
             result = convertList(node);
+        case "java.util.Date"
+            long = node.getTime;
+            result = datetime(long, "ConvertFrom", "epochtime", "TicksPerSecond", 1000, "TimeZone", "UTC", "Format", "dd-MMM-uuuu HH:mm:ss.SSS z");
         otherwise
-            error("load:TypeNotSupported", "Data type '%s' is not supported.", class(node))
+            error("yaml:yaml:load:TypeNotSupported", "Data type '%s' is not supported.", class(node))
     end
 end
 

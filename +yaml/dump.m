@@ -29,7 +29,7 @@ function result = convert(data)
     elseif ischar(data) && isvector(data)
         result = convertString(data);
     elseif ~isscalar(data)
-        error("dump:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
+        error("yaml:dump:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
     elseif isstruct(data)
         result = convertStruct(data);
     elseif isfloat(data)
@@ -43,13 +43,13 @@ function result = convert(data)
     elseif yaml.isNull(data)
         result = java.lang.String(NULL_PLACEHOLDER);
     else
-        error("dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
+        error("yaml:dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
     end
 end
 
 function result = convertString(data)
     if contains(data, NULL_PLACEHOLDER)
-        error("dump:NullPlaceholderNotAllowed", "Strings must not contain '%s'.", NULL_PLACEHOLDER)
+        error("yaml:dump:NullPlaceholderNotAllowed", "Strings must not contain '%s'.", NULL_PLACEHOLDER)
     end
     result = java.lang.String(data);
 end
@@ -64,7 +64,7 @@ end
 
 function result = convertCell(data)
     if ~isvector(data)
-        error("dump:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
+        error("yaml:dump:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
     end
     result = java.util.ArrayList();
     for i = 1:length(data)

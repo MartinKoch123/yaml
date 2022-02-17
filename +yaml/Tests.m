@@ -17,24 +17,13 @@ classdef Tests < matlab.unittest.TestCase
                 "null", yaml.Null
                 "", yaml.Null
                 "~", yaml.Null
+                "2019-09-07T15:50:00", datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
             };
 
             for iTest = 1:size(tests, 1)                
                 [s, expected] = tests{iTest, :};
                 actual = yaml.load(s);
                 testCase.verifyEqual(actual, expected);
-            end
-        end
-
-        function load_unsupportedTypes(testCase)
-            tests = {
-                "2022-2-13T01:01:01", "load:TypeNotSupported"
-            };
-
-            for iTest = 1:size(tests, 1)                
-                [str, errorId] = tests{iTest, :};
-                func = @() yaml.load(str);
-                testCase.verifyError(func, errorId);
             end
         end
 
@@ -66,12 +55,12 @@ classdef Tests < matlab.unittest.TestCase
 
         function dump_unsupportedTypes(testCase)
             tests = {
-                [1, 2], "dump:ArrayNotSupported"
-                ["one", "two"], "dump:ArrayNotSupported"
-                [false, true], "dump:ArrayNotSupported"
-                {1, 2; 3, 4}, "dump:NonVectorCellNotSupported"
-                datetime(2022, 2, 13), "dump:TypeNotSupported"
-                "test $%&NULL_PLACEHOLDER$%& adfasdf", "dump:NullPlaceholderNotAllowed"
+                [1, 2], "yaml:dump:ArrayNotSupported"
+                ["one", "two"], "yaml:dump:ArrayNotSupported"
+                [false, true], "yaml:dump:ArrayNotSupported"
+                {1, 2; 3, 4}, "yaml:dump:NonVectorCellNotSupported"
+                datetime(2022, 2, 13), "yaml:dump:TypeNotSupported"
+                "test $%&NULL_PLACEHOLDER$%& adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
             };
 
             for iTest = 1:size(tests, 1)                
