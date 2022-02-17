@@ -29,10 +29,11 @@ end
 function result = convert(node)
     switch class(node)
         case "double"
-            if isempty(node)
-                error("load:TypeNotSupported", "'null' is not supported.")
+            if ~isempty(node)
+                result = node;
+            else
+                result = yaml.Null;
             end
-            result = node;
         case "char"
             result = string(node);
         case "logical"

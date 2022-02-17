@@ -11,6 +11,12 @@ classdef Tests < matlab.unittest.TestCase
                 "{}", struct()
                 sprintf("12!: 1\n12$: 2"), struct("x12_", 1, "x12__1", 2)
                 sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), struct("a", "test", "b", 123, "c", struct("d", "test2", "e", false))
+                ".nan", NaN
+                ".inf", inf
+                "-.inf", -inf
+                "null", yaml.Null
+                "", yaml.Null
+                "~", yaml.Null
             };
 
             for iTest = 1:size(tests, 1)                
@@ -23,7 +29,6 @@ classdef Tests < matlab.unittest.TestCase
         function load_unsupportedTypes(testCase)
             tests = {
                 "2022-2-13T01:01:01", "load:TypeNotSupported"
-                "", "load:TypeNotSupported"
             };
 
             for iTest = 1:size(tests, 1)                
@@ -45,6 +50,10 @@ classdef Tests < matlab.unittest.TestCase
                 {1, "test"}, "[1.0, test]"
                 {1; "test"}, "[1.0, test]"
                 {1, {2, 3}}, sprintf("- 1.0\n- [2.0, 3.0]")
+                nan, ".NaN"
+                inf, ".inf"
+                -inf, "-.inf"
+                yaml.Null, "null"
             };
 
             for iTest = 1:size(tests, 1)                
@@ -62,6 +71,7 @@ classdef Tests < matlab.unittest.TestCase
                 [false, true], "dump:ArrayNotSupported"
                 {1, 2; 3, 4}, "dump:NonVectorCellNotSupported"
                 datetime(2022, 2, 13), "dump:TypeNotSupported"
+                "test $%&NULL_PLACEHOLDER$%& adfasdf", "dump:NullPlaceholderNotAllowed"
             };
 
             for iTest = 1:size(tests, 1)                
@@ -121,6 +131,18 @@ classdef Tests < matlab.unittest.TestCase
             testCase.verifyEqual(actual, data);
 
             delete(testPath)
+        end
+
+        function isNull(testCase)
+
+            testCase.verifyTrue(yaml.isNull(yaml.Null))
+
+            nonNulls = {NaN, missing, "", "a", datetime(2022, 1, 1), NaT, '', {}, [], inf, -inf, 1};
+
+            for i = 1:length(nonNulls)
+                testCase.verifyFalse(yaml.isNull(nonNulls{i}))
+            end
+            
         end
     end
 end

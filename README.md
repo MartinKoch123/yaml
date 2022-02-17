@@ -7,7 +7,7 @@ Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and 
 ```Matlab
 >> data.a = 1.23;
 >> data.b = "hello";
->> data.c = {2, {true, 'hola'}};
+>> data.c = {2, {true, 'world'}, yaml.Null};
 
 >> s = yaml.dump(data)
 
@@ -15,7 +15,8 @@ Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and 
      b: hello
      c:
      - 2.0
-     - [true, hola]
+     - [true, world]
+     - null
      "
    
 >> result = yaml.load(s)
@@ -24,7 +25,7 @@ Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and 
 
     a: 1.2300
     b: "hello"
-    c: {[2]  {1×2 cell}}
+    c: {[2]  {1×2 cell}  [1×1 yaml.Null]}
 ```
 
 ### Read and write files
@@ -36,13 +37,13 @@ Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/) and 
 
     a: 1.2300
     b: "hello"
-    c: {[2]  {1×2 cell}}
+    c: {[2]  {1×2 cell}  [1×1 yaml.Null]}
 ```
 ## Installation
 Extract files and add them to your MATLAB search path.
 
 ## Notes
 - Requires R2019b or newer.
-- Dates and `null` are not supported.
-- Non-scalar, non-cell arrays are not supported to avoid the scalar/list ambiguity. Use 1D cells instead.
+- Dates are not supported.
+- Non-scalar, non-cell arrays are not supported to avoid the scalar/list ambiguity. Use 1D cells to represent sequences.
 - Set the output style for `yaml.dump` and `yaml.dumpFile` with the `"Style"` name-value argument using either `"auto"`, `"block"` `"flow"`. Example: `yaml.dump(data, "Style", "block")`

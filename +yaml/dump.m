@@ -6,6 +6,8 @@ arguments
     options.Style {mustBeMember(options.Style, ["flow", "block", "auto"])} = "auto"
 end
 
+NULL_PLACEHOLDER = "$%&NULL_PLACEHOLDER$%&";
+
 initSnakeYaml
 import org.yaml.snakeyaml.*;
 
@@ -19,15 +21,13 @@ catch exception
 end
 dumperOptions = getDumperOptions(options.Style);
 result = Yaml(dumperOptions).dump(javaData);
-result = string(result);
-
-end
+result = string(result).replace(NULL_PLACEHOLDER, "null");
 
 function result = convert(data)
     if iscell(data)
         result = convertCell(data);
     elseif ischar(data) && isvector(data)
-        result = java.lang.String(data);
+        result = convertString(data);
     elseif ~isscalar(data)
         error("dump:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
     elseif isstruct(data)
@@ -39,10 +39,19 @@ function result = convert(data)
     elseif islogical(data)
         result = java.lang.Boolean(data);
     elseif isstring(data)
-        result = java.lang.String(data);
+        result = convertString(data);
+    elseif yaml.isNull(data)
+        result = java.lang.String(NULL_PLACEHOLDER);
     else
         error("dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
     end
+end
+
+function result = convertString(data)
+    if contains(data, NULL_PLACEHOLDER)
+        error("dump:NullPlaceholderNotAllowed", "Strings must not contain '%s'.", NULL_PLACEHOLDER)
+    end
+    result = java.lang.String(data);
 end
 
 function result = convertStruct(data)
@@ -77,4 +86,6 @@ function opts = getDumperOptions(style)
     styleFields = classes(4).getDeclaredFields();
     styleIndex = find(style == ["flow", "block", "auto"]);
     opts.setDefaultFlowStyle(styleFields(styleIndex).get([]));
+end
+
 end
