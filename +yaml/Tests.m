@@ -18,6 +18,9 @@ classdef Tests < matlab.unittest.TestCase
                 "", yaml.Null
                 "~", yaml.Null
                 "2019-09-07T15:50:00", datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
+                "2019-09-07 15:50:00", datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
+                "2019-09-07", datetime(2019, 9, 7, "TimeZone", "UTC")
+                "2019 09 07 15:50:00", "2019 09 07 15:50:00"
             };
 
             for iTest = 1:size(tests, 1)                
