@@ -1,7 +1,30 @@
 function result = load(s)
-%LOAD Parse YAML string
-%   Parse a string in YAML format and convert it to appropriate
-%   data types.
+%YAML.LOAD Parse YAML string
+%   DATA = YAML.LOAD(STR) parses a YAML string STR and converts it to
+%   appropriate data types DATA.
+%
+%   The YAML types are convert to MATLAB types as follows:
+%       YAML type                  | MATLAB type
+%       ---------------------------|------------
+%       Sequence                   | cell
+%       Mapping                    | struct
+%       Floating-point number      | double 
+%       Integer                    | double
+%       Boolean                    | logical   
+%       String                     | string
+%       Date (yyyy-mm-ddTHH:MM:SS) | datetime
+%       Date (yyyy-mm-dd)          | datetime
+%       null                       | yaml.Null
+%
+%   Example:
+%       >> STR = "{a: 1, b: [text, false]}";
+%       >> DATA = yaml.load(STR)
+%
+%         struct with fields:
+%           a: 1
+%           b: {["text"]  [0]}
+%       
+%   See also YAML.LOADFILE, YAML.DUMP, YAML.DUMPFILE, YAML.ISNULL
 
 arguments
     s (1, 1) string

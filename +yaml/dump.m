@@ -1,9 +1,36 @@
-function result = dump(data, options)
+function result = dump(data, style)
 %DUMP Convert data to YAML string
+%   STR = YAML.DUMP(DATA) converts DATA to a YAML string STR. 
+% 
+%   STR = YAML.DUMP(DATA, STYLE) uses a specific output style.
+%   STYLE can be "auto" (default), "block" or "flow".
+%
+%   The following types are supported for DATA:
+%       MATLAB type          | YAML type
+%       ---------------------|----------------------
+%       vector cell array    | Sequence
+%       struct               | Mapping
+%       scalar single/double | Floating-point number
+%       scalar int8/../int64 | Integer
+%       scalar logical       | Boolean
+%       scalar string        | String
+%       char vector          | String
+%       scalar yaml.Null     | null
+%
+%   Example:
+%       >> DATA.a = 1
+%       >> DATA.b = {"text", false}
+%       >> STR = yaml.dump(DATA)
+% 
+%         "a: 1.0
+%         b: [text, false]
+%         "
+%
+%   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL 
 
 arguments
     data
-    options.Style {mustBeMember(options.Style, ["flow", "block", "auto"])} = "auto"
+    style {mustBeMember(style, ["flow", "block", "auto"])} = "auto"
 end
 
 NULL_PLACEHOLDER = "$%&NULL_PLACEHOLDER$%&";
@@ -19,7 +46,7 @@ catch exception
     end
     exception.rethrow;
 end
-dumperOptions = getDumperOptions(options.Style);
+dumperOptions = getDumperOptions(style);
 result = Yaml(dumperOptions).dump(javaData);
 result = string(result).replace(NULL_PLACEHOLDER, "null");
 

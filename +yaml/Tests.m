@@ -82,7 +82,7 @@ classdef Tests < matlab.unittest.TestCase
             
             for iTest = 1:size(tests, 1)
                 [style, expected] = tests{iTest, :};
-                actual = yaml.dump(data, "Style", style);
+                actual = yaml.dump(data, style);
                 testCase.verifyEqual(actual, expected);
             end
 
