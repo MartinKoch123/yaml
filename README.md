@@ -48,4 +48,4 @@ Extract files and add them to your MATLAB search path.
 ## Notes
 - Requires R2019b or newer.
 - Non-scalar, non-cell arrays are not supported to avoid the scalar/list ambiguity. Use 1D cells to represent sequences.
-- Set the output style for `yaml.dump` and `yaml.dumpFile` with the `"Style"` name-value argument using either `"auto"`, `"block"` `"flow"`. Example: `yaml.dump(data, "Style", "block")`
+- Set the output style for `yaml.dump` and `yaml.dumpFile` with an optional argument value `"auto"`, `"block"` `"flow"`. Example: `yaml.dump(data, "block")`
