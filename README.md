@@ -3,9 +3,6 @@
 
 [![View yaml on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/106765-yaml)
 
-## Installation
-Extract files and add them to your MATLAB search path.
-
 ## Examples
 ### Load and dump
 ```Matlab
@@ -66,8 +63,17 @@ Extract files and add them to your MATLAB search path.
     "null
      "
 ```
-### MATLAB arrays
-Since a MATLAB scalar is simultaneously a one-element sequence, non-scalar arrays are not allowed to guarantee consistent conversion behaviour. Use MATLAB cells to create YAML sequences.
+
+### Load YAML sequences as MATLAB standard arrays
+By default, sequences are loaded as nested cell arrays to distinguish between YAML scalars and YAML one-element sequences and to supported mixed type sequences. If you use the `ConvertToArray` option, sequences are converted to 1D or 2D standard arrays if possible:
+```Matlab
+>> yaml.load("[[1, 2], [3, 4]]", "ConvertToArray", true)
+     1     2
+     3     4
+```
+
+### Dump MATLAB standard arrays
+Since a MATLAB scalar is simultaneously a one-element array, non-scalar standard arrays are not allowed to guarantee consistent conversion behaviour. Use MATLAB cells to create YAML sequences. An option for automatic conversion might be added in the future.
 ```Matlab
 >> arrayData = [1, 2, 3];
 >> cellData = num2cell(arrayData);
