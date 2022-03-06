@@ -3,10 +3,12 @@ classdef Tests < matlab.unittest.TestCase
     methods(Test)    
         function load(testCase)
             tests = {
+                % YAML | expected result
                 "test # comment", "test"
                 "1.23", 1.23
                 "True", true
                 "1", 1
+                "[1, 2]", {1, 2}
                 "[1, 2, True, test]", {1, 2, true, "test"}
                 "{}", struct()
                 sprintf("12!: 1\n12$: 2"), struct("x12_", 1, "x12__1", 2)
@@ -30,8 +32,32 @@ classdef Tests < matlab.unittest.TestCase
             end
         end
 
+        function load_converToArray(testCase)
+            tests = {
+                % YAML | expected result
+                "[1]", 1
+                "[1, 2]", [1, 2]
+                "[[1, 2], [3, 4]]", [1, 2; 3, 4]
+                "[[[1, 2], [3, 4]], [[5, 6], [7, 8]]]", {[1, 2; 3, 4], [5, 6; 7, 8]}
+                "[[1, 2], [3]]", {[1, 2], 3}
+                "[]", []
+                "[[1, 2], []]", {[1, 2], []}
+                "[1, true]", {1, true}
+                "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
+                "[null, 1]", {yaml.Null, 1}
+                "[null, null]", [yaml.Null, yaml.Null]
+            };
+
+            for iTest = 1:size(tests, 1)                
+                [s, expected] = tests{iTest, :};
+                actual = yaml.load(s, "ConvertToArray", true);
+                testCase.verifyEqual(actual, expected);
+            end
+        end
+
         function dump(testCase)
             tests = {
+                % Data | expected YAML
                 "test", "test"
                 'test', "test"
                 't', "t"
@@ -58,6 +84,7 @@ classdef Tests < matlab.unittest.TestCase
 
         function dump_unsupportedTypes(testCase)
             tests = {
+                % Data | expected error
                 [1, 2], "yaml:dump:ArrayNotSupported"
                 ["one", "two"], "yaml:dump:ArrayNotSupported"
                 [false, true], "yaml:dump:ArrayNotSupported"
@@ -116,12 +143,22 @@ classdef Tests < matlab.unittest.TestCase
             data = struct("a", 1.23, "b", "test");
 
             testPath = tempname;
-
             yaml.dumpFile(testPath, data)
             actual = yaml.loadFile(testPath);
 
             testCase.verifyEqual(actual, data);
+            delete(testPath)
+        end
 
+        function loadFile_convertToArray(testCase)
+            data = {1, 2};
+            expected = [1, 2];
+
+            testPath = tempname;
+            yaml.dumpFile(testPath, data)
+            actual = yaml.loadFile(testPath, "ConvertToArray", true);
+
+            testCase.verifyEqual(actual, expected);
             delete(testPath)
         end
 

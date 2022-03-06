@@ -1,12 +1,17 @@
-function result = loadFile(filePath)
+function result = loadFile(filePath, options)
 % LOADFILE Read YAML file.
 %   DATA = YAML.LOADFILE(FILE) reads a YAML file and converts it to
 %   appropriate data types DATA.
 %
+%   DATA = YAML.LOADFILE(STR, "ConvertToArray", true) additionally converts 
+%   sequences to 1D or 2D non-cell arrays if possible. 
+%
 %   The YAML types are convert to MATLAB types as follows:
+%
 %       YAML type                  | MATLAB type
 %       ---------------------------|------------
-%       Sequence                   | cell
+%       Sequence                   | cell or array if possible and
+%                                  | "ConvertToArray" is enabled
 %       Mapping                    | struct
 %       Floating-point number      | double 
 %       Integer                    | double
@@ -32,9 +37,10 @@ function result = loadFile(filePath)
 
 arguments
     filePath (1, 1) string
+    options.ConvertToArray (1, 1) logical = false
 end
 
 content = string(fileread(filePath));
-result = yaml.load(content);
+result = yaml.load(content, "ConvertToArray", options.ConvertToArray);
 
 end
