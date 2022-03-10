@@ -90,7 +90,7 @@ function result = convertStruct(data)
 end
 
 function result = convertCell(data)
-    if ~isvector(data)
+    if ~isempty(data) && ~isvector(data)
         error("yaml:dump:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
     end
     result = java.util.ArrayList();

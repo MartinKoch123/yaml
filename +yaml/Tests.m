@@ -65,6 +65,7 @@ classdef Tests < matlab.unittest.TestCase
                 int32(1), "1"
                 true, "true"
                 struct("a", "test", "b", 123), "{a: test, b: 123.0}"
+                {}, "[]"
                 {1, "test"}, "[1.0, test]"
                 {1; "test"}, "[1.0, test]"
                 {1, {2, 3}}, sprintf("- 1.0\n- [2.0, 3.0]")
