@@ -1,6 +1,6 @@
 classdef Tests < matlab.unittest.TestCase
 
-    methods(Test)    
+    methods(Test)
         function load(testCase)
             tests = {
                 % YAML | expected result
@@ -122,7 +122,7 @@ classdef Tests < matlab.unittest.TestCase
         function dumpFile(testCase)
             data = struct("a", 1.23, "b", "test");
             expected = "{a: 1.23, b: test}";
-            if ispc 
+            if ispc
                 expected = expected + sprintf("\r\n");
             else
                 expected = expected + sprintf("\n");

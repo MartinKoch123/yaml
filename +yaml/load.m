@@ -3,8 +3,8 @@ function result = load(s, options)
 %   DATA = YAML.LOAD(STR) parses a YAML string STR and converts it to
 %   appropriate data types DATA.
 %
-%   DATA = YAML.LOAD(STR, "ConvertToArray", true) additionally converts 
-%   sequences to 1D or 2D non-cell arrays if possible. 
+%   DATA = YAML.LOAD(STR, "ConvertToArray", true) additionally converts
+%   sequences to 1D or 2D non-cell arrays if possible.
 %
 %   The YAML types are convert to MATLAB types as follows:
 %
@@ -13,9 +13,9 @@ function result = load(s, options)
 %       Sequence                   | cell or array if possible and
 %                                  | "ConvertToArray" is enabled
 %       Mapping                    | struct
-%       Floating-point number      | double 
+%       Floating-point number      | double
 %       Integer                    | double
-%       Boolean                    | logical   
+%       Boolean                    | logical
 %       String                     | string
 %       Date (yyyy-mm-ddTHH:MM:SS) | datetime
 %       Date (yyyy-mm-dd)          | datetime
@@ -28,7 +28,7 @@ function result = load(s, options)
 %         struct with fields:
 %           a: 1
 %           b: {["text"]  [0]}
-%       
+%
 %   See also YAML.LOADFILE, YAML.DUMP, YAML.DUMPFILE, YAML.ISNULL
 
 arguments
@@ -58,7 +58,7 @@ end
             case "double"
                 if ~isempty(node)
                     result = node;
-                else 
+                else
                     result = yaml.Null;
                 end
             case "char"
@@ -103,7 +103,7 @@ end
     
         % Convert to non-cell array if possible
         if isempty(result)
-            result = []; 
+            result = [];
             return
         elseif ~elementsHaveConsistentType(result)
             return

@@ -2,7 +2,7 @@ function dumpFile(filePath, data, style)
 % DUMPFILE Write data to YAML file.
 %   YAML.DUMPFILE(FILE, DATA) converts DATA to YAML and saves it in a new
 %   file FILE.
-% 
+%
 %   YAML.DUMPFILE(DATA, STYLE) uses a specific output style.
 %   STYLE can be "auto" (default), "block" or "flow".
 %
@@ -24,15 +24,15 @@ function dumpFile(filePath, data, style)
 %       >> FILE = ".\test.yaml"
 %       >> yaml.dumpFile(FILE, DATA)
 %       >> yaml.loadFile("test.yaml")
-% 
+%
 %         struct with fields:
-% 
+%
 %           a: 1
 %           b: {["text"]  [0]}
-% 
+%
 
 %
-%   See also YAML.DUMP, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL 
+%   See also YAML.DUMP, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL
 
 arguments
     filePath (1, 1) string

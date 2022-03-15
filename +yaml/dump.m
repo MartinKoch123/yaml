@@ -1,7 +1,7 @@
 function result = dump(data, style)
 %DUMP Convert data to YAML string
-%   STR = YAML.DUMP(DATA) converts DATA to a YAML string STR. 
-% 
+%   STR = YAML.DUMP(DATA) converts DATA to a YAML string STR.
+%
 %   STR = YAML.DUMP(DATA, STYLE) uses a specific output style.
 %   STYLE can be "auto" (default), "block" or "flow".
 %
@@ -21,12 +21,12 @@ function result = dump(data, style)
 %       >> DATA.a = 1
 %       >> DATA.b = {"text", false}
 %       >> STR = yaml.dump(DATA)
-% 
+%
 %         "a: 1.0
 %         b: [text, false]
 %         "
 %
-%   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL 
+%   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL
 
 arguments
     data
@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.*;
 try
     javaData = convert(data);
 catch exception
-    if string(exception.identifier).startsWith("dump") 
+    if string(exception.identifier).startsWith("dump")
         error(exception.identifier, exception.message);
     end
     exception.rethrow;
@@ -109,7 +109,7 @@ end
 
 function opts = getDumperOptions(style)
     import org.yaml.snakeyaml.*;
-    opts = DumperOptions();    
+    opts = DumperOptions();
     classes = opts.getClass.getClasses;
     styleFields = classes(4).getDeclaredFields();
     styleIndex = find(style == ["flow", "block", "auto"]);
