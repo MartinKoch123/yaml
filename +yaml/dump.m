@@ -33,7 +33,7 @@ arguments
     style {mustBeMember(style, ["flow", "block", "auto"])} = "auto"
 end
 
-NULL_PLACEHOLDER = "$%&NULL_PLACEHOLDER$%&";
+NULL_PLACEHOLDER = "$%&?"; % Should have 4 characters for correct line breaks.
 
 initSnakeYaml
 import org.yaml.snakeyaml.*;
@@ -76,7 +76,8 @@ end
 
 function result = convertString(data)
     if contains(data, NULL_PLACEHOLDER)
-        error("yaml:dump:NullPlaceholderNotAllowed", "Strings must not contain '%s'.", NULL_PLACEHOLDER)
+        error("yaml:dump:NullPlaceholderNotAllowed", ...
+            "Strings must not contain '%s' since it is used as a placeholder for null values.", NULL_PLACEHOLDER)
     end
     result = java.lang.String(data);
 end

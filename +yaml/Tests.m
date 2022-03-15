@@ -91,7 +91,7 @@ classdef Tests < matlab.unittest.TestCase
                 [false, true], "yaml:dump:ArrayNotSupported"
                 {1, 2; 3, 4}, "yaml:dump:NonVectorCellNotSupported"
                 datetime(2022, 2, 13), "yaml:dump:TypeNotSupported"
-                "test $%&NULL_PLACEHOLDER$%& adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
+                "test $%&? adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
             };
 
             for iTest = 1:size(tests, 1)                
