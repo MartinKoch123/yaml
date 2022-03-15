@@ -25,8 +25,8 @@ classdef Tests < matlab.unittest.TestCase
                 "2019 09 07 15:50:00", "2019 09 07 15:50:00"
             };
 
-            for iTest = 1:size(tests, 1)                
-                [s, expected] = tests{iTest, :};
+            for test = tests'
+                [s, expected] = test{:};
                 actual = yaml.load(s);
                 testCase.verifyEqual(actual, expected);
             end
@@ -48,8 +48,8 @@ classdef Tests < matlab.unittest.TestCase
                 "[null, null]", [yaml.Null, yaml.Null]
             };
 
-            for iTest = 1:size(tests, 1)                
-                [s, expected] = tests{iTest, :};
+            for test = tests'
+                [s, expected] = test{:};
                 actual = yaml.load(s, "ConvertToArray", true);
                 testCase.verifyEqual(actual, expected);
             end
@@ -75,8 +75,8 @@ classdef Tests < matlab.unittest.TestCase
                 yaml.Null, "null"
             };
 
-            for iTest = 1:size(tests, 1)                
-                [data, expected] = tests{iTest, :};
+            for test = tests'
+                [data, expected] = test{:};
                 expected = expected + newline;
                 actual = yaml.dump(data);
                 testCase.verifyEqual(actual, expected);
@@ -94,8 +94,8 @@ classdef Tests < matlab.unittest.TestCase
                 "test $%&? adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
             };
 
-            for iTest = 1:size(tests, 1)                
-                [data, errorId] = tests{iTest, :};
+            for test = tests'
+                [data, errorId] = test{:};
                 func = @() yaml.dump(data);
                 testCase.verifyError(func, errorId);
             end
@@ -172,7 +172,23 @@ classdef Tests < matlab.unittest.TestCase
             for i = 1:length(nonNulls)
                 testCase.verifyFalse(yaml.isNull(nonNulls{i}))
             end
+        end
+
+        function null(testCase)
+            tests = {
+                % Input arguments | Expected
+                {}, yaml.Null
+                {1}, yaml.Null
+                {2}, repmat(yaml.Null, 2, 2)
+                {2, 3}, repmat(yaml.Null, 2, 3)
+                {3, 2}, repmat(yaml.Null, 3, 2)
+            };
             
+            for test = tests'
+                [args, expected] = test{:};
+                actual = yaml.Null(args{:});
+                testCase.assertEqual(actual, expected)
+            end
         end
     end
 end
