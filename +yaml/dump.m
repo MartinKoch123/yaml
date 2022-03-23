@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.*;
 try
     javaData = convert(data);
 catch exception
-    if string(exception.identifier).startsWith("dump")
+    if string(exception.identifier).startsWith("yaml:dump")
         error(exception.identifier, exception.message);
     end
     exception.rethrow;
