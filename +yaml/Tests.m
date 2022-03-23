@@ -73,6 +73,15 @@ classdef Tests < matlab.unittest.TestCase
                 inf, ".inf"
                 -inf, "-.inf"
                 yaml.Null, "null"
+                [1, 2], "[1.0, 2.0]"
+                ["a", "b"], "[a, b]"
+                [true, false], "[true, false]"
+                [], "[]"
+                zeros(1, 0), "[]"
+                zeros(0, 1), "[]"
+                int32(ones(2, 2, 2)), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
+                num2cell(int32(ones(2, 2, 2))), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
+                int32(ones(2, 1, 2)), sprintf("- [1, 1]\n- [1, 1]")
             };
 
             for test = tests'
@@ -83,13 +92,23 @@ classdef Tests < matlab.unittest.TestCase
             end
         end
 
+        function dump_3dcell(testCase)
+            data = num2cell(ones(2, 2, 2));
+            data{1, 1, 2} = "a";
+            data{1, 2, 1} = yaml.Null;
+            data{2, 1, 1} = {1, 2};
+
+            expected = sprintf("- - [1.0, a]\n  - ['null', 1.0]\n- - - [1.0, 2.0]\n    - 1.0\n  - [1.0, 1.0]\n");
+            
+            actual = yaml.dump(data);
+            testCase.verifyEqual(actual, expected);
+        end
+
         function dump_unsupportedTypes(testCase)
             tests = {
                 % Data | expected error
-                [1, 2], "yaml:dump:ArrayNotSupported"
-                ["one", "two"], "yaml:dump:ArrayNotSupported"
-                [false, true], "yaml:dump:ArrayNotSupported"
-                {1, 2; 3, 4}, "yaml:dump:NonVectorCellNotSupported"
+                ones(2, 2, 2, 2), "yaml:dump:HigherDimensionsNotSupported"
+                num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
                 datetime(2022, 2, 13), "yaml:dump:TypeNotSupported"
                 "test $%&? adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
             };

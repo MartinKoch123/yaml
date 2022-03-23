@@ -6,18 +6,18 @@
 ## Examples
 ### Load and dump
 ```Matlab
->> data.a = 1.23;
+>> data.a = [1.23, 4.56];
 >> data.b = {int32(2), {true, "hello", yaml.Null}};
 
 >> s = yaml.dump(data)
-    "a: 1.23
+    "a: [1.23, 4.56]
      b:
      - 2
      - [true, hello, null]
      "
    
 >> result = yaml.load(s)
-    a: 1.2300
+    a: {[1.2300]  [4.5600]}
     b: {[2]  {1×3 cell}}
 ```
 
@@ -25,21 +25,23 @@
 ```Matlab
 >> yaml.dumpFile("test.yaml", data)
 >> result = yaml.loadFile("test.yaml")
-    a: 1.2300
+    a: {[1.2300]  [4.5600]}
     b: {[2]  {1×3 cell}}
 ```
 
 ### Styles
 ```Matlab
 >> s = yaml.dump(data, "auto")  % default
-    "a: 1.23
+    "a: [1.23, 4.56]
      b:
      - 2
      - [true, hello, null]
      "
      
 >> s = yaml.dump(data, "block")
-    "a: 1.23
+    "a: 
+     - 1.23
+     - 4.56
      b:
      - 2
      - - true
@@ -48,7 +50,7 @@
      "
      
 >> s = yaml.dump(data, "flow")
-    "{a: 1.23, b: [2, [true, hello, null]]}
+    "{a: [1.23, 4.56], b: [2, [true, hello, 'null']], c: [2, [true, hola]]}
      "
 ```
 ### YAML null
@@ -72,17 +74,18 @@ By default, sequences are loaded as nested cell arrays to distinguish between YA
      3     4
 ```
 
-### Dump MATLAB standard arrays
-Since a MATLAB scalar is simultaneously a one-element array, non-scalar standard arrays are not allowed to guarantee consistent conversion behaviour. Use MATLAB cells to create YAML sequences. An option for automatic conversion might be added in the future.
-```Matlab
->> arrayData = [1, 2, 3];
->> cellData = num2cell(arrayData);
->> s = yaml.dump(cellData)
-    "[1.0, 2.0, 3.0]
-     "
+### Control dumping behaviour for MATLAB arrays
+Since every MATLAB scalar is always an array and every array technically has at least 2 dimensions, there exists two ambiguities when dumping arrays:
+- *MATLAB scalar* &rarr; *YAML scalar* (default) or *YAML one-element sequence*
+- *MATLAB vector* &rarr; *YAML sequence* (default) or *YAML sequence containing one YAML sequence*
 
->> cellResult = yaml.load(s);
->> arrayResult = cell2mat(cellResult)
-     1     2     3
+To avoid theses ambiguities and get consistent conversion behaviour, convert all your array data to **nested vector cells** before dumping them.
+```Matlab
+>> yaml.dump({1})
+    "[1.0]
+    "
+>> yaml.dump({{1, 2}})
+    "- [1.0, 2.0]
+    "
 ```
 

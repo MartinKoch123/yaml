@@ -6,16 +6,23 @@ function result = dump(data, style)
 %   STYLE can be "auto" (default), "block" or "flow".
 %
 %   The following types are supported for DATA:
-%       MATLAB type          | YAML type
-%       ---------------------|----------------------
-%       vector cell array    | Sequence
-%       struct               | Mapping
-%       scalar single/double | Floating-point number
-%       scalar int8/../int64 | Integer
-%       scalar logical       | Boolean
-%       scalar string        | String
-%       char vector          | String
-%       scalar yaml.Null     | null
+%       MATLAB type             | YAML type
+%       ------------------------|----------------------
+%       1D cell array           | Sequence
+%       1D non-scalar array     | Sequence
+%       2D/3D cell array        | Nested sequences
+%       2D/3D non-scalar array  | Nested sequences
+%       struct                  | Mapping
+%       scalar single/double    | Floating-point number
+%       scalar int8/../int64    | Integer
+%       scalar logical          | Boolean
+%       scalar string           | String
+%       char vector             | String
+%       scalar yaml.Null        | null
+%
+%   Array conversion can be ambiguous. To ensure consistent conversion
+%   behaviour, consider manually converting array data to nested 1D cells 
+%   before converting it to YAML.
 %
 %   Example:
 %       >> DATA.a = 1
@@ -56,7 +63,7 @@ function result = convert(data)
     elseif ischar(data) && isvector(data)
         result = convertString(data);
     elseif ~isscalar(data)
-        error("yaml:dump:ArrayNotSupported", "Non-cell arrays are not supported. Use 1D cells to represent array data.")
+        result = convertArray(data);
     elseif isstruct(data)
         result = convertStruct(data);
     elseif isfloat(data)
@@ -76,8 +83,7 @@ end
 
 function result = convertString(data)
     if contains(data, NULL_PLACEHOLDER)
-        error("yaml:dump:NullPlaceholderNotAllowed", ...
-            "Strings must not contain '%s' since it is used as a placeholder for null values.", NULL_PLACEHOLDER)
+        error("yaml:dump:NullPlaceholderNotAllowed", "Strings must not contain '%s' since it is used as a placeholder for null values.", NULL_PLACEHOLDER)
     end
     result = java.lang.String(data);
 end
@@ -91,12 +97,35 @@ function result = convertStruct(data)
 end
 
 function result = convertCell(data)
-    if ~isempty(data) && ~isvector(data)
-        error("yaml:dump:NonVectorCellNotSupported", "Non-vector cell arrays are not supported. Use nested cells instead.")
-    end
+    data = nest(data);
     result = java.util.ArrayList();
     for i = 1:length(data)
         result.add(convert(data{i}));
+    end
+end
+
+function result = convertArray(data)
+    result = convertCell(num2cell(data));
+end
+
+function result = nest(data)
+    if isvector(data) || isempty(data)
+        result = data; 
+        return
+    end
+    n = size(data, 1);
+    nDimensions = length(size(data));
+    result = cell(1, n);
+    if nDimensions == 2
+        for i = 1:n
+            result{i} = data(i, :);
+        end
+    elseif nDimensions == 3
+        for i = 1:n
+            result{i} = squeeze(data(i, :, :));
+        end
+    else
+        error("yaml:dump:HigherDimensionsNotSupported", "Arrays with more than three dimensions are not supported. Use nested cells instead.")
     end
 end
 
