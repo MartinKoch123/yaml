@@ -30,8 +30,6 @@ function dumpFile(filePath, data, style)
 %           a: 1
 %           b: {["text"]  [0]}
 %
-
-%
 %   See also YAML.DUMP, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL
 
 arguments

@@ -23,7 +23,7 @@ classdef Tests < matlab.unittest.TestCase
                 "2019-09-07 15:50:00", datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
                 "2019-09-07", datetime(2019, 9, 7, "TimeZone", "UTC")
                 "2019 09 07 15:50:00", "2019 09 07 15:50:00"
-            };
+                };
 
             for test = tests'
                 [s, expected] = test{:};
@@ -46,7 +46,7 @@ classdef Tests < matlab.unittest.TestCase
                 "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
                 "[null, 1]", {yaml.Null, 1}
                 "[null, null]", [yaml.Null, yaml.Null]
-            };
+                };
 
             for test = tests'
                 [s, expected] = test{:};
@@ -82,7 +82,7 @@ classdef Tests < matlab.unittest.TestCase
                 int32(ones(2, 2, 2)), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
                 num2cell(int32(ones(2, 2, 2))), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
                 int32(ones(2, 1, 2)), sprintf("- [1, 1]\n- [1, 1]")
-            };
+                };
 
             for test = tests'
                 [data, expected] = test{:};
@@ -99,7 +99,7 @@ classdef Tests < matlab.unittest.TestCase
             data{2, 1, 1} = {1, 2};
 
             expected = sprintf("- - [1.0, a]\n  - ['null', 1.0]\n- - - [1.0, 2.0]\n    - 1.0\n  - [1.0, 1.0]\n");
-            
+
             actual = yaml.dump(data);
             testCase.verifyEqual(actual, expected);
         end
@@ -111,7 +111,7 @@ classdef Tests < matlab.unittest.TestCase
                 num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
                 datetime(2022, 2, 13), "yaml:dump:TypeNotSupported"
                 "test $%&? adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
-            };
+                };
 
             for test = tests'
                 [data, errorId] = test{:};
@@ -128,8 +128,8 @@ classdef Tests < matlab.unittest.TestCase
                 "block", sprintf("a: 1.0\nb:\n- 3.0\n- - 4.0\n")
                 "flow", sprintf("{a: 1.0, b: [3.0, [4.0]]}\n")
                 "auto", sprintf("a: 1.0\nb:\n- 3.0\n- [4.0]\n")
-            };
-            
+                };
+
             for iTest = 1:size(tests, 1)
                 [style, expected] = tests{iTest, :};
                 actual = yaml.dump(data, style);
@@ -201,8 +201,8 @@ classdef Tests < matlab.unittest.TestCase
                 {2}, repmat(yaml.Null, 2, 2)
                 {2, 3}, repmat(yaml.Null, 2, 3)
                 {3, 2}, repmat(yaml.Null, 3, 2)
-            };
-            
+                };
+
             for test = tests'
                 [args, expected] = test{:};
                 actual = yaml.Null(args{:});

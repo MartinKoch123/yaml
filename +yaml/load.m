@@ -76,31 +76,31 @@ end
                 error("yaml:load:TypeNotSupported", "Data type '%s' is not supported.", class(node))
         end
     end
-    
+
     function result = convertMap(map)
         result = struct();
-        
+
         keys = string(map.keySet().toArray())';
         fieldNames = matlab.lang.makeValidName(keys);
         fieldNames = matlab.lang.makeUniqueStrings(fieldNames);
-        
+
         for i = 1:map.size()
             value = map.get(java.lang.String(keys(i)));
             result.(fieldNames(i)) = convert(value);
         end
     end
-    
+
     function result = convertList(list)
-    
+
         % Convert Java list to cell array.
         result = cell(1, list.size());
         for i = 1:list.size()
             result{i} = convert(list.get(i - 1));
         end
-    
+
         if ~options.ConvertToArray
             return; end
-    
+
         % Convert to non-cell array if possible
         if isempty(result)
             result = [];
@@ -113,28 +113,27 @@ end
             result = vertcat(result{:});
         end
     end
-
 end
 
 function initSnakeYaml
-    snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
-    if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
-        javaaddpath(snakeYamlFile);
-    end
+snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
+if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
+    javaaddpath(snakeYamlFile);
+end
 end
 
 function result = elementsHaveConsistentType(c)
-    result = all(cellfun(@(x) strcmp(class(x), class(c{1})), c));
+result = all(cellfun(@(x) strcmp(class(x), class(c{1})), c));
 end
 
 function result = elementsAreScalar(c)
-    result = all(cellfun(@isscalar, c));
+result = all(cellfun(@isscalar, c));
 end
 
 function result = elementsAreRowOrEmpty(c)
-    result = all(cellfun(@(x) isrow(x) || isempty(x), c));
+result = all(cellfun(@(x) isrow(x) || isempty(x), c));
 end
 
 function result = elementsHaveConsistentLength(c)
-    result = all(cellfun(@(x) length(x) == length(c{1}), c));
+result = all(cellfun(@(x) length(x) == length(c{1}), c));
 end
