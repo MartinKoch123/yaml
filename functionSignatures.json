@@ -16,16 +16,16 @@
   },
   "yaml.dumpFile": {
 	  "inputs": [
-		{
-			"name": "data",
-			"kind": "required",
-			"purpose": "Data to be converted to YAML"
-		},
-		{
+        {
 			"name": "filePath",
 			"kind": "required",
 			"type": "string",
 			"purpose": "Path to new YAML file"
+		},
+		{
+			"name": "data",
+			"kind": "required",
+			"purpose": "Data to be converted to YAML"
 		},
 		{
 			"name": "style",
