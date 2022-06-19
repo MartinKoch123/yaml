@@ -1,5 +1,5 @@
 # yaml
-[YAML](https://yaml.org/) parser and emitter for MATLAB R2019b or newer. Based on [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/src/master/).
+[YAML 1.1](https://yaml.org/spec/1.1/) parser and emitter for MATLAB R2019b or newer. Based on [SnakeYAML 1.30](https://bitbucket.org/snakeyaml/snakeyaml/src/master/).
 
 [![View yaml on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/106765-yaml)
 
