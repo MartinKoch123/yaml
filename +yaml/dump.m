@@ -53,7 +53,8 @@ catch exception
     end
     exception.rethrow;
 end
-dumperOptions = getDumperOptions(style);
+dumperOptions = DumperOptions();
+setFlowStyle(dumperOptions, style);
 result = Yaml(dumperOptions).dump(javaData);
 result = string(result).replace(NULL_PLACEHOLDER, "null");
 
@@ -136,13 +137,23 @@ result = string(result).replace(NULL_PLACEHOLDER, "null");
         end
     end
 
-    function opts = getDumperOptions(style)
+    function setFlowStyle(options, style)
         import org.yaml.snakeyaml.*;
-        opts = DumperOptions();
-        classes = opts.getClass.getClasses;
-        styleFields = classes(4).getDeclaredFields();
-        styleIndex = find(style == ["flow", "block", "auto"]);
-        opts.setDefaultFlowStyle(styleFields(styleIndex).get([]));
+        if style == "auto"
+            return
+        end
+        classes = options.getClass.getClasses;
+        classNames = arrayfun(@(c) string(c.getName), classes);
+        styleClassIndex = find(classNames.endsWith("$FlowStyle"), 1);
+        if isempty(styleClassIndex)
+            error("yaml:dump:FlowStyleSelectionFailed", "Unable to select flow style '%s'.", style);
+        end
+        styleFields = classes(styleClassIndex).getDeclaredFields();
+        styleIndex = find(arrayfun(@(f) string(f.getName).lower == style, styleFields));
+        if isempty(styleIndex)
+            error("yaml:dump:FlowStyleSelectionFailed", "Unable to select flow style '%s'.", style);
+        end
+        options.setDefaultFlowStyle(styleFields(styleIndex).get([]));
     end
 
 end
