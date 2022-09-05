@@ -19,7 +19,7 @@
         {
 			"name": "filePath",
 			"kind": "required",
-			"type": "string",
+			"type": ["file=*.yaml,*.yml,*.txt"],
 			"purpose": "Path to new YAML file"
 		},
 		{
