@@ -3,7 +3,7 @@ function dumpFile(filePath, data, style)
 %   YAML.DUMPFILE(FILE, DATA) converts DATA to YAML and saves it in a new
 %   file FILE.
 %
-%   YAML.DUMPFILE(DATA, STYLE) uses a specific output style.
+%   YAML.DUMPFILE(FILE, DATA, STYLE) uses a specific output style.
 %   STYLE can be "auto" (default), "block" or "flow".
 %
 %   The following types are supported for DATA:
