@@ -62,7 +62,6 @@ classdef Tests < matlab.unittest.TestCase
                 'test', "test"
                 't', "t"
                 1.23, "1.23"
-                int32(1), "1"
                 true, "true"
                 struct("a", "test", "b", 123), "{a: test, b: 123.0}"
                 {}, "[]"
@@ -89,6 +88,20 @@ classdef Tests < matlab.unittest.TestCase
                 expected = expected + newline;
                 actual = yaml.dump(data);
                 testCase.verifyEqual(actual, expected);
+            end
+        end
+
+        function dump_integer(testCase)
+            for nBit = [8, 16, 32, 64]
+                for prefix = ["", "u"]
+                    for limitFunction = {@intmin, @intmax}
+                        typeName = prefix + "int" + nBit;
+                        data = limitFunction{1}(typeName);
+                        expected = string(data) + newline;
+                        actual = yaml.dump(data);
+                        testCase.verifyEqual(actual, expected);
+                    end
+                end
             end
         end
 

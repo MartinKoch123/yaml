@@ -15,6 +15,7 @@ function result = dump(data, style)
 %       struct                  | Mapping
 %       scalar single/double    | Floating-point number
 %       scalar int8/../int64    | Integer
+%       scalar uint8/../uint64  | Integer
 %       scalar logical          | Boolean
 %       scalar string           | String
 %       char vector             | String
@@ -69,6 +70,11 @@ result = string(result).replace(NULL_PLACEHOLDER, "null");
             result = convertStruct(data);
         elseif isfloat(data)
             result = java.lang.Double(data);
+        elseif isa(data, "int64")
+            result = java.lang.Long(data);
+        elseif isa(data, "uint32") || isa(data, "uint64")
+            hexStr = dec2hex(data);
+            result = java.math.BigInteger(hexStr, 16);
         elseif isinteger(data)
             result = java.lang.Integer(data);
         elseif islogical(data)

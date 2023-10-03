@@ -72,6 +72,8 @@ end
             case "java.util.Date"
                 long = node.getTime;
                 result = datetime(long, "ConvertFrom", "epochtime", "TicksPerSecond", 1000, "TimeZone", "UTC", "Format", "dd-MMM-uuuu HH:mm:ss.SSS z");
+            case "java.math.BigInteger"
+                error("yaml:load:IntOutOfRange", "Integer '%s' is out of the supported range.", node.toString())
             otherwise
                 error("yaml:load:TypeNotSupported", "Data type '%s' is not supported.", class(node))
         end
