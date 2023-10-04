@@ -86,8 +86,10 @@ end
         fieldNames = matlab.lang.makeValidName(keys);
         fieldNames = matlab.lang.makeUniqueStrings(fieldNames);
 
+        convertToJavaKeyType = getJavaKeyTypeConverter(map);
+        
         for i = 1:map.size()
-            value = map.get(java.lang.String(keys(i)));
+            value = map.get(convertToJavaKeyType(keys(i)));
             result.(fieldNames(i)) = convert(value);
         end
     end
@@ -121,6 +123,30 @@ function initSnakeYaml
 snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
 if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
     javaaddpath(snakeYamlFile);
+end
+end
+
+function convertToJavaKeyType = getJavaKeyTypeConverter(map)
+% Assume the key types are all the same and use only the type of
+% the first key
+keyIter = map.keySet().iterator();
+if keyIter.hasNext()
+    firstKey = keyIter.next();
+else
+    convertToJavaKeyType = @(x)java.lang.String(x);
+    return
+end
+
+if map.keySet().contains(java.lang.String(firstKey))
+    convertToJavaKeyType = @(x)java.lang.String(x);
+elseif map.keySet().contains(java.lang.Integer(firstKey))
+    convertToJavaKeyType = @(x)java.lang.Integer(x);
+elseif map.keySet().contains(java.lang.Double(firstKey))
+    convertToJavaKeyType = @(x)java.lang.Double(x);
+elseif map.keySet().contains(java.lang.Float(firstKey))
+    convertToJavaKeyType = @(x)java.lang.Float(x);
+else
+    error("yaml:load:TypeNotSupported", "Key type is not supported.")
 end
 end
 
