@@ -3,6 +3,9 @@ function result = load(s, options)
 %   DATA = YAML.LOAD(STR) parses a YAML string STR and converts it to
 %   appropriate data types DATA.
 %
+%   DATA = YAML.LOAD(STR, "StringToChar", true) converts YAML String to
+%   MATLAB char instead of MATLAB string.
+%
 %   DATA = YAML.LOAD(STR, "ConvertToArray", true) additionally converts
 %   sequences to 1D or 2D non-cell arrays if possible.
 %
@@ -16,7 +19,7 @@ function result = load(s, options)
 %       Floating-point number      | double
 %       Integer                    | double
 %       Boolean                    | logical
-%       String                     | string
+%       String                     | string (default) or char
 %       Date (yyyy-mm-ddTHH:MM:SS) | datetime
 %       Date (yyyy-mm-dd)          | datetime
 %       null                       | yaml.Null
@@ -33,6 +36,7 @@ function result = load(s, options)
 
 arguments
     s (1, 1) string
+    options.StringToChar (1, 1) logical = false
     options.ConvertToArray (1, 1) logical = false
 end
 
@@ -62,7 +66,11 @@ end
                     result = yaml.Null;
                 end
             case "char"
-                result = string(node);
+                if options.StringToChar
+                    result = node;
+                else
+                    result = string(node);
+                end
             case "logical"
                 result = logical(node);
             case "java.util.LinkedHashMap"
