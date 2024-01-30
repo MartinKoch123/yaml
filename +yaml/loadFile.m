@@ -3,6 +3,9 @@ function result = loadFile(filePath, options)
 %   DATA = YAML.LOADFILE(FILE) reads a YAML file and converts it to
 %   appropriate data types DATA.
 %
+%   DATA = YAML.LOADFILE(STR, "StringToChar", true) converts YAML String to
+%   MATLAB char instead of MATLAB string.
+%
 %   DATA = YAML.LOADFILE(STR, "ConvertToArray", true) additionally converts
 %   sequences to 1D or 2D non-cell arrays if possible.
 %
@@ -16,7 +19,7 @@ function result = loadFile(filePath, options)
 %       Floating-point number      | double
 %       Integer                    | double
 %       Boolean                    | logical
-%       String                     | string
+%       String                     | string (default) or char
 %       Date (yyyy-mm-ddTHH:MM:SS) | datetime
 %       Date (yyyy-mm-dd)          | datetime
 %       null                       | yaml.Null
@@ -37,10 +40,11 @@ function result = loadFile(filePath, options)
 
 arguments
     filePath (1, 1) string
+    options.StringToChar (1, 1) logical = false
     options.ConvertToArray (1, 1) logical = false
 end
 
 content = string(fileread(filePath));
-result = yaml.load(content, "ConvertToArray", options.ConvertToArray);
+result = yaml.load(content, "ConvertToArray", options.ConvertToArray, "StringToChar", options.StringToChar);
 
 end
