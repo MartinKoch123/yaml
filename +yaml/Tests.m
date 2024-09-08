@@ -2,27 +2,31 @@ classdef Tests < matlab.unittest.TestCase
 
     methods(Test)
         function load(testCase)
+            str = @struct;
+
             tests = {
                 % YAML | expected result
-                "test # comment", "test"
-                "1.23", 1.23
-                "True", true
-                "1", 1
-                "[1, 2]", {1, 2}
-                "[1, 2, True, test]", {1, 2, true, "test"}
-                "{}", struct()
-                sprintf("12!: 1\n12$: 2"), struct("x12_", 1, "x12__1", 2)
-                sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), struct("a", "test", "b", 123, "c", struct("d", "test2", "e", false))
-                ".nan", NaN
-                ".inf", inf
-                "-.inf", -inf
-                "null", yaml.Null
-                "", yaml.Null
-                "~", yaml.Null
-                "2019-09-07T15:50:00", datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
-                "2019-09-07 15:50:00", datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
-                "2019-09-07", datetime(2019, 9, 7, "TimeZone", "UTC")
-                "2019 09 07 15:50:00", "2019 09 07 15:50:00"
+                "test # comment",       "test"
+                "1.23",                 1.23
+                "True",                 true
+                "1",                    1
+                "[1, 2]",               {1, 2}
+                "[1, 2, True, test]",   {1, 2, true, "test"}
+                "{}",                   struct()
+                sprintf("12!: 1\n12$: 2"),                              str("x12_", 1, "x12__1", 2)
+                sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
+                "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2), str("a", 2, "b", 3)}                
+                "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1), str("a", 2)}, {str("a", 3), str("a", 4)}}
+                ".nan",     NaN
+                ".inf",     inf
+                "-.inf",    -inf
+                "null",     yaml.Null
+                "",         yaml.Null
+                "~",        yaml.Null
+                "2019-09-07T15:50:00",      datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
+                "2019-09-07 15:50:00",      datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
+                "2019-09-07",               datetime(2019, 9, 7, "TimeZone", "UTC")
+                "2019 09 07 15:50:00",      "2019 09 07 15:50:00"
                 };
 
             for test = tests'
@@ -33,6 +37,8 @@ classdef Tests < matlab.unittest.TestCase
         end
 
         function load_converToArray(testCase)
+            str = @struct;
+
             tests = {
                 % YAML | expected result
                 "[1]", 1
@@ -46,6 +52,16 @@ classdef Tests < matlab.unittest.TestCase
                 "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
                 "[null, 1]", {yaml.Null, 1}
                 "[null, null]", [yaml.Null, yaml.Null]
+
+                % 1D struct array
+                "[{a: 1, b: 2}, {a: 2, b: 3}]", str("a", {1, 2}, "b", {2, 3})
+                "[{a: 1, b: 2}, {a: 2, c: 3}]", {str("a", 1, "b", 2), str("a", 2, "c", 3)}
+
+                % 2D struct array
+                "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]", str("a", {1, 2; 3, 4})
+                "[[{a: 1}, {a: 2}], [{a: 3}, {b: 4}]]", {str("a", {1, 2}), {str("a", 3), str("b", 4)}}
+                "[[{a: 1}, {a: 2}], [{b: 3}, {b: 4}]]", {str("a", {1, 2}), str("b", {3, 4})}
+                "[[{a: 1}, {b: 2}], [{c: 3}, {d: 4}]]", {str("a", 1), str("b", 2); str("c", 3), str("d", 4)}
                 };
 
             for test = tests'

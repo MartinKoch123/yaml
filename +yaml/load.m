@@ -109,6 +109,8 @@ end
             return
         elseif ~elementsHaveConsistentType(result)
             return
+        elseif isstruct(result{1}) && ~structsAreCompatible(result)
+            return
         elseif elementsAreScalar(result)
             result = horzcat(result{:});
         elseif elementsAreRowOrEmpty(result) && elementsHaveConsistentLength(result)
@@ -124,18 +126,24 @@ if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
 end
 end
 
-function result = elementsHaveConsistentType(c)
-result = all(cellfun(@(x) strcmp(class(x), class(c{1})), c));
+function result = elementsHaveConsistentType(cell_)
+types = cellfun(@(x) string(class(x)), cell_);
+result = length(unique(types)) == 1;
 end
 
-function result = elementsAreScalar(c)
-result = all(cellfun(@isscalar, c));
+function result = elementsAreScalar(cell_)
+result = all(cellfun(@isscalar, cell_));
 end
 
-function result = elementsAreRowOrEmpty(c)
-result = all(cellfun(@(x) isrow(x) || isempty(x), c));
+function result = elementsAreRowOrEmpty(cell_)
+result = all(cellfun(@(x) isrow(x) || isempty(x), cell_));
 end
 
-function result = elementsHaveConsistentLength(c)
-result = all(cellfun(@(x) length(x) == length(c{1}), c));
+function result = elementsHaveConsistentLength(cell_)
+result = all(cellfun(@(x) length(x) == length(cell_{1}), cell_));
+end
+
+function result = structsAreCompatible(cell_)
+fields = sort(fieldnames(cell_{1}));
+result = all(cellfun(@(s) isequal(sort(fieldnames(s)), fields), cell_));
 end
