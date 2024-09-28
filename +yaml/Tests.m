@@ -1,124 +1,135 @@
 classdef Tests < matlab.unittest.TestCase
 
-    methods(Test)
-        function load(testCase)
-            str = @struct;
+    properties (TestParameter)
+        LOAD_TEST = nest({
+            % YAML                  Expected result
+            "test # comment",       "test"
+            "1.23",                 1.23
+            "True",                 true
+            "1",                    1
+            "[1, 2]",               {1, 2}
+            "[1, 2, True, test]",   {1, 2, true, "test"}
+            "{}",                   struct()
+            sprintf("12!: 1\n12$: 2"),                              str("x12_", 1, "x12__1", 2)
+            sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
+            "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2), str("a", 2, "b", 3)}                
+            "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1), str("a", 2)}, {str("a", 3), str("a", 4)}}
+            ".nan",                 NaN
+            ".inf",                 inf
+            "-.inf",                -inf
+            "null",                 yaml.Null
+            "",                     yaml.Null
+            "~",                    yaml.Null
+            "2019-09-07T15:50:00",  datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
+            "2019-09-07 15:50:00",  datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
+            "2019-09-07",           datetime(2019, 9, 7, "TimeZone", "UTC")
+            "2019 09 07 15:50:00",  "2019 09 07 15:50:00"
+        });
 
-            tests = {
-                % YAML | expected result
-                "test # comment",       "test"
-                "1.23",                 1.23
-                "True",                 true
-                "1",                    1
-                "[1, 2]",               {1, 2}
-                "[1, 2, True, test]",   {1, 2, true, "test"}
-                "{}",                   struct()
-                sprintf("12!: 1\n12$: 2"),                              str("x12_", 1, "x12__1", 2)
-                sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
-                "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2), str("a", 2, "b", 3)}                
-                "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1), str("a", 2)}, {str("a", 3), str("a", 4)}}
-                ".nan",     NaN
-                ".inf",     inf
-                "-.inf",    -inf
-                "null",     yaml.Null
-                "",         yaml.Null
-                "~",        yaml.Null
-                "2019-09-07T15:50:00",      datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
-                "2019-09-07 15:50:00",      datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
-                "2019-09-07",               datetime(2019, 9, 7, "TimeZone", "UTC")
-                "2019 09 07 15:50:00",      "2019 09 07 15:50:00"
-                };
+        CONVERT_TO_ARRAY_TEST = nest({
+            % YAML | expected result
+            "[1]", 1
+            "[1, 2]", [1, 2]
+            "[[1, 2], [3, 4]]", [1, 2; 3, 4]
+            "[[[1, 2], [3, 4]], [[5, 6], [7, 8]]]", {[1, 2; 3, 4], [5, 6; 7, 8]}
+            "[[1, 2], [3]]", {[1, 2], 3}
+            "[]", []
+            "[[1, 2], []]", {[1, 2], []}
+            "[1, true]", {1, true}
+            "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
+            "[null, 1]", {yaml.Null, 1}
+            "[null, null]", [yaml.Null, yaml.Null]
 
-            for test = tests'
-                [s, expected] = test{:};
-                actual = yaml.load(s);
-                testCase.verifyEqual(actual, expected);
-            end
+            % 1D struct array
+            "[{a: 1, b: 2}, {a: 2, b: 3}]", str("a", {1, 2}, "b", {2, 3})
+            "[{a: 1, b: 2}, {a: 2, c: 3}]", {str("a", 1, "b", 2), str("a", 2, "c", 3)}
+
+            % 2D struct array
+            "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]", str("a", {1, 2; 3, 4})
+            "[[{a: 1}, {a: 2}], [{a: 3}, {b: 4}]]", {str("a", {1, 2}), {str("a", 3), str("b", 4)}}
+            "[[{a: 1}, {a: 2}], [{b: 3}, {b: 4}]]", {str("a", {1, 2}), str("b", {3, 4})}
+            "[[{a: 1}, {b: 2}], [{c: 3}, {d: 4}]]", {str("a", 1), str("b", 2); str("c", 3), str("d", 4)}
+        });
+
+        DUMP_TEST = nest({
+            % Data          Expected YAML
+            "test",         "test"
+            'test',         "test"
+            't',            "t"
+            1.23,           "1.23"
+            true,           "true"
+            struct("a", "test", "b", 123), "{a: test, b: 123.0}"
+            {},             "[]"
+            {1, "test"},    "[1.0, test]"
+            {1; "test"},    "[1.0, test]"
+            {1, {2, 3}},    sprintf("- 1.0\n- [2.0, 3.0]")
+            nan,            ".NaN"
+            inf,            ".inf"
+            -inf,           "-.inf"
+            yaml.Null,      "null"
+            [1, 2],         "[1.0, 2.0]"
+            ["a", "b"],     "[a, b]"
+            [true, false],  "[true, false]"
+            [],             "[]"
+            zeros(1, 0),    "[]"
+            zeros(0, 1),    "[]"
+            num2cell(int32(ones(2, 2, 2))), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
+            int32(ones(2, 1, 2)),           sprintf("- - [1, 1]\n- - [1, 1]")
+        })
+
+        INVALID_DUMP_DATA = nest({
+            % Data                      expected error
+            num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
+            datetime(2022, 2, 13),      "yaml:dump:TypeNotSupported"
+            "test $%&? adfasdf",        "yaml:dump:NullPlaceholderNotAllowed"
+        });
+
+        INTEGER_TYPE = {"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64"}
+        INTEGER_LIMIT_FUNCTION = {@intmin, @intmax}
+
+        NULL_CLASS_TEST = nest({
+            % Input arguments   Expected
+            {},                 yaml.Null
+            {1},                yaml.Null
+            {2},                repmat(yaml.Null, 2, 2)
+            {2, 3},             repmat(yaml.Null, 2, 3)
+            {3, 2},             repmat(yaml.Null, 3, 2)
+        });
+
+        NON_NULL_TEST = {NaN, missing, "", "a", datetime(2022, 1, 1), NaT, '', {}, [], inf, -inf, 1};
+    end
+
+    methods (Test)
+
+        function load(testCase, LOAD_TEST)
+            [s, expected] = LOAD_TEST{:};
+            actual = yaml.load(s);
+            testCase.verifyEqual(actual, expected);
         end
 
-        function load_converToArray(testCase)
-            str = @struct;
-
-            tests = {
-                % YAML | expected result
-                "[1]", 1
-                "[1, 2]", [1, 2]
-                "[[1, 2], [3, 4]]", [1, 2; 3, 4]
-                "[[[1, 2], [3, 4]], [[5, 6], [7, 8]]]", {[1, 2; 3, 4], [5, 6; 7, 8]}
-                "[[1, 2], [3]]", {[1, 2], 3}
-                "[]", []
-                "[[1, 2], []]", {[1, 2], []}
-                "[1, true]", {1, true}
-                "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
-                "[null, 1]", {yaml.Null, 1}
-                "[null, null]", [yaml.Null, yaml.Null]
-
-                % 1D struct array
-                "[{a: 1, b: 2}, {a: 2, b: 3}]", str("a", {1, 2}, "b", {2, 3})
-                "[{a: 1, b: 2}, {a: 2, c: 3}]", {str("a", 1, "b", 2), str("a", 2, "c", 3)}
-
-                % 2D struct array
-                "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]", str("a", {1, 2; 3, 4})
-                "[[{a: 1}, {a: 2}], [{a: 3}, {b: 4}]]", {str("a", {1, 2}), {str("a", 3), str("b", 4)}}
-                "[[{a: 1}, {a: 2}], [{b: 3}, {b: 4}]]", {str("a", {1, 2}), str("b", {3, 4})}
-                "[[{a: 1}, {b: 2}], [{c: 3}, {d: 4}]]", {str("a", 1), str("b", 2); str("c", 3), str("d", 4)}
-                };
-
-            for test = tests'
-                [s, expected] = test{:};
-                actual = yaml.load(s, "ConvertToArray", true);
-                testCase.verifyEqual(actual, expected);
-            end
+        function load_convertToArray(testCase, CONVERT_TO_ARRAY_TEST)
+            [s, expected] = CONVERT_TO_ARRAY_TEST{:};
+            actual = yaml.load(s, "ConvertToArray", true);
+            testCase.verifyEqual(actual, expected);
         end
 
-        function dump(testCase)
-            tests = {
-                % Data | expected YAML
-                "test", "test"
-                'test', "test"
-                't', "t"
-                1.23, "1.23"
-                true, "true"
-                struct("a", "test", "b", 123), "{a: test, b: 123.0}"
-                {}, "[]"
-                {1, "test"}, "[1.0, test]"
-                {1; "test"}, "[1.0, test]"
-                {1, {2, 3}}, sprintf("- 1.0\n- [2.0, 3.0]")
-                nan, ".NaN"
-                inf, ".inf"
-                -inf, "-.inf"
-                yaml.Null, "null"
-                [1, 2], "[1.0, 2.0]"
-                ["a", "b"], "[a, b]"
-                [true, false], "[true, false]"
-                [], "[]"
-                zeros(1, 0), "[]"
-                zeros(0, 1), "[]"
-                int32(ones(2, 2, 2)), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
-                num2cell(int32(ones(2, 2, 2))), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
-                int32(ones(2, 1, 2)), sprintf("- [1, 1]\n- [1, 1]")
-                };
-
-            for test = tests'
-                [data, expected] = test{:};
-                expected = expected + newline;
-                actual = yaml.dump(data);
-                testCase.verifyEqual(actual, expected);
-            end
+        function dump(testCase, DUMP_TEST)
+            [data, expected] = DUMP_TEST{:};
+            expected = expected + newline;
+            actual = yaml.dump(data);
+            testCase.verifyEqual(actual, expected);
         end
 
-        function dump_integer(testCase)
-            for nBit = [8, 16, 32, 64]
-                for prefix = ["", "u"]
-                    for limitFunction = {@intmin, @intmax}
-                        typeName = prefix + "int" + nBit;
-                        data = limitFunction{1}(typeName);
-                        expected = string(data) + newline;
-                        actual = yaml.dump(data);
-                        testCase.verifyEqual(actual, expected);
-                    end
-                end
-            end
+        function dump_integer(testCase, INTEGER_TYPE, INTEGER_LIMIT_FUNCTION)
+            data = INTEGER_LIMIT_FUNCTION(INTEGER_TYPE);
+            expected = string(data) + newline;
+            actual = yaml.dump(data);
+            testCase.verifyEqual(actual, expected);
+
+            dataArray = data * ones(2, 2, 2, INTEGER_TYPE);
+            expected = compose("- - [%s, %s]\n  - [%s, %s]\n- - [%s, %s]\n  - [%s, %s]\n", repelem(string(data), 8));
+            actual = yaml.dump(dataArray);
+            testCase.verifyEqual(actual, expected);
         end
 
         function dump_3dcell(testCase)
@@ -133,20 +144,10 @@ classdef Tests < matlab.unittest.TestCase
             testCase.verifyEqual(actual, expected);
         end
 
-        function dump_unsupportedTypes(testCase)
-            tests = {
-                % Data | expected error
-                ones(2, 2, 2, 2), "yaml:dump:HigherDimensionsNotSupported"
-                num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
-                datetime(2022, 2, 13), "yaml:dump:TypeNotSupported"
-                "test $%&? adfasdf", "yaml:dump:NullPlaceholderNotAllowed"
-                };
-
-            for test = tests'
-                [data, errorId] = test{:};
-                func = @() yaml.dump(data);
-                testCase.verifyError(func, errorId);
-            end
+        function dump_unsupportedTypes(testCase, INVALID_DUMP_DATA)
+            [data, errorId] = INVALID_DUMP_DATA{:};
+            func = @() yaml.dump(data);
+            testCase.verifyError(func, errorId);
         end
 
         function dump_style(testCase)
@@ -211,32 +212,30 @@ classdef Tests < matlab.unittest.TestCase
             delete(testPath)
         end
 
-        function isNull(testCase)
-
+        function isNull_true(testCase)
             testCase.verifyTrue(yaml.isNull(yaml.Null))
-
-            nonNulls = {NaN, missing, "", "a", datetime(2022, 1, 1), NaT, '', {}, [], inf, -inf, 1};
-
-            for i = 1:length(nonNulls)
-                testCase.verifyFalse(yaml.isNull(nonNulls{i}))
-            end
         end
 
-        function null(testCase)
-            tests = {
-                % Input arguments | Expected
-                {}, yaml.Null
-                {1}, yaml.Null
-                {2}, repmat(yaml.Null, 2, 2)
-                {2, 3}, repmat(yaml.Null, 2, 3)
-                {3, 2}, repmat(yaml.Null, 3, 2)
-                };
+        function isNull_false(testCase, NON_NULL_TEST)
+            testCase.verifyFalse(yaml.isNull(NON_NULL_TEST))
+        end
 
-            for test = tests'
-                [args, expected] = test{:};
-                actual = yaml.Null(args{:});
-                testCase.assertEqual(actual, expected)
-            end
+        function null(testCase, NULL_CLASS_TEST)
+            [args, expected] = NULL_CLASS_TEST{:};
+            actual = yaml.Null(args{:});
+            testCase.assertEqual(actual, expected)
         end
     end
+end
+
+function nestedCell = nest(cell2d)
+    n = size(cell2d, 1);
+    nestedCell = cell(1, n);
+    for i = 1:n
+        nestedCell{i} = cell2d(i, :);
+    end
+end
+
+function y = str(varargin)
+    y = struct(varargin{:});
 end

@@ -27,11 +27,11 @@ function result = dump(data, style)
 %
 %   Example:
 %       >> DATA.a = 1
-%       >> DATA.b = {"text", false}
+%       >> DATA.b = {"hello", false}
 %       >> STR = yaml.dump(DATA)
 %
 %         "a: 1.0
-%         b: [text, false]
+%         b: [hello, false]
 %         "
 %
 %   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL
@@ -60,47 +60,33 @@ result = Yaml(dumperOptions).dump(javaData);
 result = string(result).replace(NULL_PLACEHOLDER, "null");
 
     function result = convert(data)
-        if iscell(data)
+        if isempty(data)
+            result = java.util.ArrayList();
+        elseif iscell(data)
             result = convertCell(data);
-        elseif ischar(data) && isvector(data)
-            result = convertString(data);
+        elseif isfloat(data)
+            result = data;
+        elseif isinteger(data) || islogical(data) || isstruct(data)
+            result = convertIntegerOrLogical(data);
+        elseif isstring(data) || (ischar(data) && isvector(data))
+            checkForNullPlaceholder(data);
+            result = data;
         elseif ~isscalar(data)
             result = convertArray(data);
-        elseif isstruct(data)
-            result = convertStruct(data);
-        elseif isfloat(data)
-            result = java.lang.Double(data);
-        elseif isa(data, "int64")
-            result = java.lang.Long(data);
-        elseif isa(data, "uint32") || isa(data, "uint64")
-            hexStr = dec2hex(data);
-            result = java.math.BigInteger(hexStr, 16);
-        elseif isinteger(data)
-            result = java.lang.Integer(data);
-        elseif islogical(data)
-            result = java.lang.Boolean(data);
-        elseif isstring(data)
-            result = convertString(data);
         elseif yaml.isNull(data)
-            result = java.lang.String(NULL_PLACEHOLDER);
+            result = NULL_PLACEHOLDER;
         else
             error("yaml:dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
         end
     end
 
-    function result = convertString(data)
-        if contains(data, NULL_PLACEHOLDER)
-            error("yaml:dump:NullPlaceholderNotAllowed", "Strings must not contain '%s' since it is used as a placeholder for null values.", NULL_PLACEHOLDER)
-        end
-        result = java.lang.String(data);
-    end
-
-    function result = convertStruct(data)
-        result = java.util.LinkedHashMap();
-        for key = string(fieldnames(data))'
-            value = convert(data.(key));
-            result.put(key, value);
-        end
+    function checkForNullPlaceholder(data)
+        assert( ...
+            ~any(contains(data, NULL_PLACEHOLDER), "all"), ...
+            "yaml:dump:NullPlaceholderNotAllowed", ...
+            "Strings must not contain '%s' since it is used as a placeholder for null values.", ...
+            NULL_PLACEHOLDER ...
+        )
     end
 
     function result = convertCell(data)
@@ -113,6 +99,62 @@ result = string(result).replace(NULL_PLACEHOLDER, "null");
 
     function result = convertArray(data)
         result = convertCell(num2cell(data));
+    end
+
+    function result = convertScalar_integer(data, javaType)
+        result = java.(javaType)(data);
+    end
+
+    function result = convertScalar_uint32_uint64(data)
+        hexStr = dec2hex(data);
+        result = java.math.BigInteger(hexStr, 16);
+    end
+
+    function result = convertScalar_struct(data)
+        result = java.util.LinkedHashMap();
+        for key = string(fieldnames(data))'
+            value = convert(data.(key));
+            result.put(key, value);
+        end
+    end
+
+    function result = convertIntegerOrLogical(data)
+        switch class(data)
+            case {"uint32", "uint64"};  javaType = "math.BigInteger";   converter = @convertScalar_uint32_uint64;
+            case "int64";               javaType = "lang.Long";         converter = @(data) convertScalar_integer(data, javaType);
+            case "logical";             javaType = "lang.Boolean";      converter = @(data) convertScalar_integer(data, javaType);
+            case "struct";              javaType = "util.LinkedHashMap"; converter = @convertScalar_struct;
+            otherwise;                  javaType = "lang.Integer";      converter = @(data) convertScalar_integer(data, javaType);
+        end
+
+        % Dump MATLAB scalars (i.e. 2-D arrays with one element) as scalars.
+        if isscalar(data)
+            result = converter(data);
+            return
+        end
+
+        % Create Java array.
+        if isvector(data)
+
+            % Dump MATLAB vectors (i.e. 2-D arrays where one dimension has size 1) as a sequences.
+            size_ = numel(data);
+        else
+
+            % Dump MATLAB non-vector, non-scalar arrays as nested sequences.
+            size_ = size(data);
+        end
+        nDims = length(size_);
+        result = javaArray("java." + javaType, size_);
+
+        % Loop over elements in N-D array via linear indexing.
+        for i = 1 : numel(data)
+
+            % Convert linear index to N-D array subscripts.
+            [subscripts{1:nDims}] = ind2sub(size_, i);
+
+            % Add scalar to Java array.
+            result(subscripts{:}) = converter(data(i));
+        end
     end
 
     function result = nest(data)
