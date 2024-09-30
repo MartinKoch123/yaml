@@ -19,7 +19,7 @@ function result = load(s, options)
 %       String                     | string
 %       Date (yyyy-mm-ddTHH:MM:SS) | datetime
 %       Date (yyyy-mm-dd)          | datetime
-%       null                       | yaml.Null
+%       null                       | 0-by-0 double
 %
 %   Example:
 %       >> STR = "{a: 1, b: [text, false]}";
@@ -29,14 +29,14 @@ function result = load(s, options)
 %           a: 1
 %           b: {["text"]  [0]}
 %
-%   See also YAML.LOADFILE, YAML.DUMP, YAML.DUMPFILE, YAML.ISNULL
+%   See also YAML.LOADFILE, YAML.DUMP, YAML.DUMPFILE
     
     arguments
         s (1, 1) string
         options.ConvertToArray (1, 1) logical = false
     end
     
-    initSnakeYaml
+    initializeSnakeYaml
     import org.yaml.snakeyaml.*;
     try
         rootNode = Yaml().load(s);
@@ -55,12 +55,8 @@ function result = load(s, options)
 
     function result = convert(node)
         switch class(node)
-            case "double"
-                if ~isempty(node)
-                    result = node;
-                else
-                    result = yaml.Null;
-                end
+            case "double" % Null is read as 0-by-0
+                result = node;
             case "char"
                 result = string(node);
             case "logical"
@@ -95,7 +91,7 @@ function result = load(s, options)
     function result = convertList(list)
 
         % Convert Java list to cell array.
-        result = cell(1, list.size());
+        result = cell(list.size(), 1);
         for i = 1:list.size()
             result{i} = convert(list.get(i - 1));
         end
@@ -105,14 +101,14 @@ function result = load(s, options)
 
         % Convert to non-cell array if possible
         if isempty(result)
-            result = [];
+            result = zeros(1, 0);
             return
-        elseif ~elementsHaveEqualType(result)
+        elseif ~elementsHaveEqualType(result) || ~elementsAreAllNonNull(result)
             return
         elseif isstruct(result{1}) && ~structsAreCompatible(result)
             return
         elseif elementsHaveEqualSize(result)
-            numDims = trueNumDims(result{1});
+            numDims = effectiveSize(result{1});
 
             % Since we are working our way "inside-out", i.e. from the last
             % dimension to the first dimension, we need to concatenate
@@ -128,6 +124,10 @@ function result = load(s, options)
             end
         end
     end
+end
+
+function result = elementsAreAllNonNull(cell_)
+    result = all(cellfun(@(x) max(size(x)) > 0, cell_));
 end
 
 function result = elementsHaveEqualType(cell_)

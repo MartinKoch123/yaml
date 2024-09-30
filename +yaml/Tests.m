@@ -13,18 +13,18 @@ classdef Tests < matlab.unittest.TestCase
             ".nan",                 NaN
             ".inf",                 inf
             "-.inf",                -inf
-            "null",                 yaml.Null
-            "",                     yaml.Null
-            "~",                    yaml.Null
+            "null",                 []
+            "",                     []
+            "~",                    []
             "{}",                   struct()
 
             % Test mixed types.
-            "[1, 2, True, test]",   {1, 2, true, "test"}
+            "[1, 2, True, test]",   {1; 2; true; "test"}
 
             % Test maps.
             sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
-            "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2), str("a", 2, "b", 3)}                
-            "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1), str("a", 2)}, {str("a", 3), str("a", 4)}}
+            "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2); str("a", 2, "b", 3)}                
+            "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1); str("a", 2)}; {str("a", 3); str("a", 4)}}
             sprintf("12!: 1\n12$: 2"),                              str("x12_", 1, "x12__1", 2)
             
             % Test datetimes.
@@ -36,22 +36,22 @@ classdef Tests < matlab.unittest.TestCase
 
         CONVERT_TO_ARRAY_TEST = nest({
             % YAML              Expected result
-            "[]",               []
-            "[[1, 2], []]",     {[1, 2], []}
-            "[[1, 2], [3]]",    {[1, 2], 3}
-            "[1, true]",        {1, true}
+            "[]",               zeros(1, 0)
+            "[[1, 2], []]",     {[1; 2]; zeros(1, 0)}
+            "[[1, 2], [3]]",    {[1; 2]; 3}
+            "[1, true]",        {1; true}
             "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
-            "[null, 1]",        {yaml.Null, 1}
-            "[null, null]",     [yaml.Null, yaml.Null]
+            "[null, 1]",        {[]; 1}
+            "[null, null]",     {[]; []}
 
             % 1D struct array
-            "[{a: 1, b: 2}, {a: 2, b: 3}]", str("a", {1, 2}, "b", {2, 3})
-            "[{a: 1, b: 2}, {a: 2, c: 3}]", {str("a", 1, "b", 2), str("a", 2, "c", 3)}
+            "[{a: 1, b: 2}, {a: 2, b: 3}]", str("a", {1; 2}, "b", {2; 3})
+            "[{a: 1, b: 2}, {a: 2, c: 3}]", {str("a", 1, "b", 2); str("a", 2, "c", 3)}
 
             % 2D struct array
             "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]", str("a", {1, 2; 3, 4})
-            "[[{a: 1}, {a: 2}], [{a: 3}, {b: 4}]]", {str("a", {1, 2}), {str("a", 3), str("b", 4)}}
-            "[[{a: 1}, {a: 2}], [{b: 3}, {b: 4}]]", {str("a", {1, 2}), str("b", {3, 4})}
+            "[[{a: 1}, {a: 2}], [{a: 3}, {b: 4}]]", {str("a", {1; 2}); {str("a", 3); str("b", 4)}}
+            "[[{a: 1}, {a: 2}], [{b: 3}, {b: 4}]]", {str("a", {1; 2}); str("b", {3; 4})}
             "[[{a: 1}, {b: 2}], [{c: 3}, {d: 4}]]", {str("a", 1), str("b", 2); str("c", 3), str("d", 4)}
         });
 
@@ -65,20 +65,21 @@ classdef Tests < matlab.unittest.TestCase
             
             true,           "true"
             struct("a", "test", "b", 123), "{a: test, b: 123.0}"
-            {},             "[]"
             {1, "test"},    "[1.0, test]"
             {1; "test"},    "[1.0, test]"
             {1, {2, 3}},    sprintf("- 1.0\n- [2.0, 3.0]")
             nan,            ".NaN"
             inf,            ".inf"
             -inf,           "-.inf"
-            yaml.Null,      "null"
+            [],             "null"
+            {},             "null"
             [1, 2],         "[1.0, 2.0]"
             ["a", "b"],     "[a, b]"
             [true, false],  "[true, false]"
-            [],             "[]"
             zeros(1, 0),    "[]"
             zeros(0, 1),    "[]"
+            cell(0, 1),    "[]"
+            cell(1, 0),    "[]"
             num2cell(int32(ones(2, 2, 2))), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
             int32(ones(2, 1, 2)),           sprintf("- - [1, 1]\n- - [1, 1]")
         })
@@ -95,7 +96,6 @@ classdef Tests < matlab.unittest.TestCase
             @() randi(2^8, "int32")
             @() uint64(randi(2^8))
             @() buildRandomString()
-            @() yaml.Null
         }
 
         DUMP_RELOAD_TEST_NUM_DIM = {0, 1, 2, 3, 4};
@@ -105,22 +105,10 @@ classdef Tests < matlab.unittest.TestCase
             % Data                      Expected error
             num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
             datetime(2022, 2, 13),      "yaml:dump:TypeNotSupported"
-            "test $%&? adfasdf",        "yaml:dump:NullPlaceholderNotAllowed"
         });
 
         INTEGER_TYPE = {"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64"}
         INTEGER_LIMIT_FUNCTION = {@intmin, @intmax}
-
-        NULL_CLASS_TEST = nest({
-            % Input arguments   Expected
-            {},                 yaml.Null
-            {1},                yaml.Null
-            {2},                repmat(yaml.Null, 2, 2)
-            {2, 3},             repmat(yaml.Null, 2, 3)
-            {3, 2},             repmat(yaml.Null, 3, 2)
-        });
-
-        NON_NULL_TEST = {NaN, missing, "", "a", datetime(2022, 1, 1), NaT, '', {}, [], inf, -inf, 1};
 
     end
 
@@ -189,10 +177,10 @@ classdef Tests < matlab.unittest.TestCase
         function dump_3dcell(testCase)
             data = num2cell(ones(2, 2, 2));
             data{1, 1, 2} = "a";
-            data{1, 2, 1} = yaml.Null;
+            data{1, 2, 1} = [];
             data{2, 1, 1} = {1, 2};
 
-            expected = sprintf("- - [1.0, a]\n  - ['null', 1.0]\n- - - [1.0, 2.0]\n    - 1.0\n  - [1.0, 1.0]\n");
+            expected = sprintf("- - [1.0, a]\n  - [null, 1.0]\n- - - [1.0, 2.0]\n    - 1.0\n  - [1.0, 1.0]\n");
 
             actual = yaml.dump(data);
             testCase.verifyEqual(actual, expected);
@@ -256,7 +244,7 @@ classdef Tests < matlab.unittest.TestCase
 
         function loadFile_convertToArray(testCase)
             data = {1, 2};
-            expected = [1, 2];
+            expected = [1; 2];
 
             testPath = tempname;
             yaml.dumpFile(testPath, data)
@@ -266,21 +254,8 @@ classdef Tests < matlab.unittest.TestCase
             delete(testPath)
         end
 
-        function isNull_true(testCase)
-            testCase.verifyTrue(yaml.isNull(yaml.Null))
-            testCase.verifyTrue(yaml.isNull(yaml.Null(2, 3)))
-        end
-
-        function isNull_false(testCase, NON_NULL_TEST)
-            testCase.verifyFalse(yaml.isNull(NON_NULL_TEST))
-        end
-
-        function null(testCase, NULL_CLASS_TEST)
-            [args, expected] = NULL_CLASS_TEST{:};
-            actual = yaml.Null(args{:});
-            testCase.assertEqual(actual, expected)
-        end
     end
+
 end
 
 function nestedCell = nest(cell2d)

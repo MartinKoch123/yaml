@@ -19,7 +19,7 @@ function result = dump(data, style)
 %       scalar logical          | Boolean
 %       scalar string           | String
 %       char vector             | String
-%       scalar yaml.Null        | null
+%       any 0-by-0 value        | null
 %
 %   Array conversion can be ambiguous. To ensure consistent conversion
 %   behaviour, consider manually converting array data to nested 1D cells
@@ -34,16 +34,14 @@ function result = dump(data, style)
 %         b: [hello, false]
 %         "
 %
-%   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL
+%   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE
 
 arguments
     data
     style {mustBeMember(style, ["flow", "block", "auto"])} = "auto"
 end
 
-NULL_PLACEHOLDER = "$%&?"; % Should have 4 characters for correct line breaks.
-
-initSnakeYaml
+initializeSnakeYaml
 import org.yaml.snakeyaml.*;
 
 try
@@ -57,7 +55,7 @@ end
 dumperOptions = DumperOptions();
 setFlowStyle(dumperOptions, style);
 result = Yaml(dumperOptions).dump(javaData);
-result = string(result).replace(NULL_PLACEHOLDER, "null");
+result = string(result);
 
     function result = convert(data)
         if sum(size(data)) == 0 % null
@@ -71,25 +69,12 @@ result = string(result).replace(NULL_PLACEHOLDER, "null");
         elseif isinteger(data) || islogical(data) || isstruct(data)
             result = convertIntegerOrLogical(data);
         elseif isstring(data) || (ischar(data) && isrow(data))
-            checkForNullPlaceholder(data);
             result = data;
-        elseif yaml.isNull(data)
-            result = strings(size(data));
-            result(:) = NULL_PLACEHOLDER;
         elseif ~isscalar(data)
             result = convertArray(data);
         else
             error("yaml:dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
         end
-    end
-
-    function checkForNullPlaceholder(data)
-        assert( ...
-            ~any(contains(data, NULL_PLACEHOLDER), "all"), ...
-            "yaml:dump:NullPlaceholderNotAllowed", ...
-            "Strings must not contain '%s' since it is used as a placeholder for null values.", ...
-            NULL_PLACEHOLDER ...
-        )
     end
 
     function result = convertCell(data)

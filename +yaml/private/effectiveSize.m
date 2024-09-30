@@ -1,4 +1,4 @@
-function n = trueNumDims(A)
+function n = effectiveSize(A)
 
 % Return the "real" number of dimensions of A, i.e., return 0 or 1, if it is a
 % scalar or vector.
