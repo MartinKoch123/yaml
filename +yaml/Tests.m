@@ -3,23 +3,31 @@ classdef Tests < matlab.unittest.TestCase
     properties (TestParameter)
         LOAD_TEST = nest({
             % YAML                  Expected result
+
+            % Test special cases.
             "test # comment",       "test"
-            "1.23",                 1.23
             "True",                 true
-            "1",                    1
-            "[1, 2]",               {1, 2}
-            "[1, 2, True, test]",   {1, 2, true, "test"}
-            "{}",                   struct()
-            sprintf("12!: 1\n12$: 2"),                              str("x12_", 1, "x12__1", 2)
-            sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
-            "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2), str("a", 2, "b", 3)}                
-            "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1), str("a", 2)}, {str("a", 3), str("a", 4)}}
+            "true",                 true
+            "False",                false
+            "false",                false
             ".nan",                 NaN
             ".inf",                 inf
             "-.inf",                -inf
             "null",                 yaml.Null
             "",                     yaml.Null
             "~",                    yaml.Null
+            "{}",                   struct()
+
+            % Test mixed types.
+            "[1, 2, True, test]",   {1, 2, true, "test"}
+
+            % Test maps.
+            sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
+            "[{a: 1, b: 2}, {a: 2, b: 3}]",                         {str("a", 1, "b", 2), str("a", 2, "b", 3)}                
+            "[[{a: 1}, {a: 2}], [{a: 3}, {a: 4}]]",                 {{str("a", 1), str("a", 2)}, {str("a", 3), str("a", 4)}}
+            sprintf("12!: 1\n12$: 2"),                              str("x12_", 1, "x12__1", 2)
+            
+            % Test datetimes.
             "2019-09-07T15:50:00",  datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
             "2019-09-07 15:50:00",  datetime(2019, 9, 7, 15, 50, 0, "TimeZone", "UTC")
             "2019-09-07",           datetime(2019, 9, 7, "TimeZone", "UTC")
@@ -27,18 +35,14 @@ classdef Tests < matlab.unittest.TestCase
         });
 
         CONVERT_TO_ARRAY_TEST = nest({
-            % YAML | expected result
-            "[1]", 1
-            "[1, 2]", [1, 2]
-            "[[1, 2], [3, 4]]", [1, 2; 3, 4]
-            "[[[1, 2], [3, 4]], [[5, 6], [7, 8]]]", {[1, 2; 3, 4], [5, 6; 7, 8]}
-            "[[1, 2], [3]]", {[1, 2], 3}
-            "[]", []
-            "[[1, 2], []]", {[1, 2], []}
-            "[1, true]", {1, true}
+            % YAML              Expected result
+            "[]",               []
+            "[[1, 2], []]",     {[1, 2], []}
+            "[[1, 2], [3]]",    {[1, 2], 3}
+            "[1, true]",        {1, true}
             "[[a, b], [c, d]]", ["a", "b"; "c", "d"]
-            "[null, 1]", {yaml.Null, 1}
-            "[null, null]", [yaml.Null, yaml.Null]
+            "[null, 1]",        {yaml.Null, 1}
+            "[null, null]",     [yaml.Null, yaml.Null]
 
             % 1D struct array
             "[{a: 1, b: 2}, {a: 2, b: 3}]", str("a", {1, 2}, "b", {2, 3})
@@ -53,10 +57,12 @@ classdef Tests < matlab.unittest.TestCase
 
         DUMP_TEST = nest({
             % Data          Expected YAML
+            1.23,           "1.23"
+            pi,             "3.141592653589793"
             "test",         "test"
             'test',         "test"
             't',            "t"
-            1.23,           "1.23"
+            
             true,           "true"
             struct("a", "test", "b", 123), "{a: test, b: 123.0}"
             {},             "[]"
@@ -77,8 +83,26 @@ classdef Tests < matlab.unittest.TestCase
             int32(ones(2, 1, 2)),           sprintf("- - [1, 1]\n- - [1, 1]")
         })
 
+        DUMP_RELOAD_TEST = {
+            @() buildRandomFloat
+            @() logical(randi(2)-1)
+            @() randi(2^8, "uint8")
+            @() randi(2^8, "uint16")
+            @() randi(2^8, "uint32")
+            @() uint64(randi(2^8))
+            @() randi(2^8, "int8")
+            @() randi(2^8, "int16")
+            @() randi(2^8, "int32")
+            @() uint64(randi(2^8))
+            @() buildRandomString()
+            @() yaml.Null
+        }
+
+        DUMP_RELOAD_TEST_NUM_DIM = {0, 1, 2, 3, 4};
+        DUMP_RELOAD_TEST_INDEX = num2cell(1:2);
+
         INVALID_DUMP_DATA = nest({
-            % Data                      expected error
+            % Data                      Expected error
             num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
             datetime(2022, 2, 13),      "yaml:dump:TypeNotSupported"
             "test $%&? adfasdf",        "yaml:dump:NullPlaceholderNotAllowed"
@@ -97,6 +121,7 @@ classdef Tests < matlab.unittest.TestCase
         });
 
         NON_NULL_TEST = {NaN, missing, "", "a", datetime(2022, 1, 1), NaT, '', {}, [], inf, -inf, 1};
+
     end
 
     methods (Test)
@@ -130,6 +155,35 @@ classdef Tests < matlab.unittest.TestCase
             expected = compose("- - [%s, %s]\n  - [%s, %s]\n- - [%s, %s]\n  - [%s, %s]\n", repelem(string(data), 8));
             actual = yaml.dump(dataArray);
             testCase.verifyEqual(actual, expected);
+        end
+
+        function dumpReload(testCase, DUMP_RELOAD_TEST, DUMP_RELOAD_TEST_NUM_DIM, DUMP_RELOAD_TEST_INDEX)
+            % Assert that dumping and reloading does not change the data. 
+            % Exception: Integers are loaded as doubles.
+
+            % Size of all array dimensions.
+            DIM_SIZE = 2; 
+
+            % Create N-D array of random values.
+            nDims = DUMP_RELOAD_TEST_NUM_DIM;
+            numElements = DIM_SIZE^DUMP_RELOAD_TEST_NUM_DIM;
+            original = arrayfun(@(x) DUMP_RELOAD_TEST(), zeros(numElements, 1));
+            if nDims > 0
+                if nDims == 1
+                    size_ = [DIM_SIZE, 1];
+                else
+                    size_ = DIM_SIZE * ones(1, DUMP_RELOAD_TEST_NUM_DIM);
+                end
+                original = reshape(original, size_);
+            end
+
+            % Dump, reload and compare.
+            yamlValue = yaml.dump(original);
+            loaded = yaml.load(yamlValue, ConvertToArray=true);
+            if isinteger(original)
+                original = double(original);
+            end
+            testCase.verifyEqual(loaded, original)
         end
 
         function dump_3dcell(testCase)
@@ -214,6 +268,7 @@ classdef Tests < matlab.unittest.TestCase
 
         function isNull_true(testCase)
             testCase.verifyTrue(yaml.isNull(yaml.Null))
+            testCase.verifyTrue(yaml.isNull(yaml.Null(2, 3)))
         end
 
         function isNull_false(testCase, NON_NULL_TEST)
@@ -238,4 +293,12 @@ end
 
 function y = str(varargin)
     y = struct(varargin{:});
+end
+
+function result = buildRandomString()
+    result = string(char(randi(94, 1, 10) + 32));
+end
+
+function result = buildRandomFloat()
+    result = rand(1)^(randi(20, 1) - 10);
 end

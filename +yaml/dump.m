@@ -60,7 +60,9 @@ result = Yaml(dumperOptions).dump(javaData);
 result = string(result).replace(NULL_PLACEHOLDER, "null");
 
     function result = convert(data)
-        if isempty(data)
+        if sum(size(data)) == 0 % null
+            result = data;
+        elseif isempty(data)
             result = java.util.ArrayList();
         elseif iscell(data)
             result = convertCell(data);
@@ -68,13 +70,14 @@ result = string(result).replace(NULL_PLACEHOLDER, "null");
             result = data;
         elseif isinteger(data) || islogical(data) || isstruct(data)
             result = convertIntegerOrLogical(data);
-        elseif isstring(data) || (ischar(data) && isvector(data))
+        elseif isstring(data) || (ischar(data) && isrow(data))
             checkForNullPlaceholder(data);
             result = data;
+        elseif yaml.isNull(data)
+            result = strings(size(data));
+            result(:) = NULL_PLACEHOLDER;
         elseif ~isscalar(data)
             result = convertArray(data);
-        elseif yaml.isNull(data)
-            result = NULL_PLACEHOLDER;
         else
             error("yaml:dump:TypeNotSupported", "Data type '%s' is not supported.", class(data))
         end
@@ -175,13 +178,6 @@ result = string(result).replace(NULL_PLACEHOLDER, "null");
             end
         else
             error("yaml:dump:HigherDimensionsNotSupported", "Arrays with more than three dimensions are not supported. Use nested cells instead.")
-        end
-    end
-
-    function initSnakeYaml
-        snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
-        if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
-            javaaddpath(snakeYamlFile);
         end
     end
 

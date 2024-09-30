@@ -30,28 +30,28 @@ function result = load(s, options)
 %           b: {["text"]  [0]}
 %
 %   See also YAML.LOADFILE, YAML.DUMP, YAML.DUMPFILE, YAML.ISNULL
-
-arguments
-    s (1, 1) string
-    options.ConvertToArray (1, 1) logical = false
-end
-
-initSnakeYaml
-import org.yaml.snakeyaml.*;
-try
-    rootNode = Yaml().load(s);
-catch cause
-    MException("yaml:load:Failed", "Failed to load YAML string.").addCause(cause).throw
-end
-
-try
-    result = convert(rootNode);
-catch exc
-    if startsWith(exc.identifier, "yaml:load:")
-        error(exc.identifier, exc.message);
+    
+    arguments
+        s (1, 1) string
+        options.ConvertToArray (1, 1) logical = false
     end
-    exc.rethrow;
-end
+    
+    initSnakeYaml
+    import org.yaml.snakeyaml.*;
+    try
+        rootNode = Yaml().load(s);
+    catch cause
+        MException("yaml:load:Failed", "Failed to load YAML string.").addCause(cause).throw
+    end
+    
+    try
+        result = convert(rootNode);
+    catch exc
+        if startsWith(exc.identifier, "yaml:load:")
+            error(exc.identifier, exc.message);
+        end
+        exc.rethrow;
+    end
 
     function result = convert(node)
         switch class(node)
@@ -107,43 +107,44 @@ end
         if isempty(result)
             result = [];
             return
-        elseif ~elementsHaveConsistentType(result)
+        elseif ~elementsHaveEqualType(result)
             return
         elseif isstruct(result{1}) && ~structsAreCompatible(result)
             return
-        elseif elementsAreScalar(result)
-            result = horzcat(result{:});
-        elseif elementsAreRowOrEmpty(result) && elementsHaveConsistentLength(result)
-            result = vertcat(result{:});
+        elseif elementsHaveEqualSize(result)
+            numDims = trueNumDims(result{1});
+
+            % Since we are working our way "inside-out", i.e. from the last
+            % dimension to the first dimension, we need to concatenate
+            % along a "new first dimension" before the current first
+            % dimension. This is done by first concatenating along a new
+            % dimension behind the last dimension ...
+            result = cat(numDims + 1, result{:});
+
+            % ... and then swapping the new last dimension with the
+            % first dimension.
+            if numDims > 0
+                result = permute(result, [numDims+1, 1 : numDims]);
+            end
         end
     end
 end
 
-function initSnakeYaml
-snakeYamlFile = fullfile(fileparts(mfilename('fullpath')), 'snakeyaml', 'snakeyaml-1.30.jar');
-if ~ismember(snakeYamlFile, javaclasspath('-dynamic'))
-    javaaddpath(snakeYamlFile);
-end
-end
-
-function result = elementsHaveConsistentType(cell_)
-types = cellfun(@(x) string(class(x)), cell_);
-result = length(unique(types)) == 1;
+function result = elementsHaveEqualType(cell_)
+    type1 = class(cell_{1});
+    result = all( ...
+        cellfun(@(x) isequal(class(x), type1), cell_) ...
+    );
 end
 
-function result = elementsAreScalar(cell_)
-result = all(cellfun(@isscalar, cell_));
-end
-
-function result = elementsAreRowOrEmpty(cell_)
-result = all(cellfun(@(x) isrow(x) || isempty(x), cell_));
-end
-
-function result = elementsHaveConsistentLength(cell_)
-result = all(cellfun(@(x) length(x) == length(cell_{1}), cell_));
+function result = elementsHaveEqualSize(cell_)
+    size1 = size(cell_{1});
+    result = all( ...
+        cellfun(@(x) isequal(size(x), size1), cell_) ...
+    );
 end
 
 function result = structsAreCompatible(cell_)
-fields = sort(fieldnames(cell_{1}));
-result = all(cellfun(@(s) isequal(sort(fieldnames(s)), fields), cell_));
+    fields = sort(fieldnames(cell_{1}));
+    result = all(cellfun(@(s) isequal(sort(fieldnames(s)), fields), cell_));
 end
