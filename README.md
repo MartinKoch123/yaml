@@ -87,3 +87,8 @@ To avoid theses ambiguities and get consistent conversion behaviour, convert all
     "
 ```
 
+## Contributors
+
+Thanks to the following people for their contributions:
+
+- **[Adam Cooman](https://github.com/AdamCooman)**
