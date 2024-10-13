@@ -1,6 +1,8 @@
 classdef Tests < matlab.unittest.TestCase
 
     properties (TestParameter)
+
+        % Parameters for testing 'yaml.load'.
         LOAD_TEST = nest({
             % YAML                  Expected result
 
@@ -34,6 +36,7 @@ classdef Tests < matlab.unittest.TestCase
             "2019 09 07 15:50:00",  "2019 09 07 15:50:00"
         });
 
+        % Parameters for testing 'yaml.load' with 'ConvertToArray' option.
         CONVERT_TO_ARRAY_TEST = nest({
             % YAML              Expected result
             "[]",               zeros(1, 0)
@@ -55,6 +58,7 @@ classdef Tests < matlab.unittest.TestCase
             "[[{a: 1}, {b: 2}], [{c: 3}, {d: 4}]]", {str("a", 1), str("b", 2); str("c", 3), str("d", 4)}
         });
 
+        % Parameters for testing 'yaml.dump'.
         DUMP_TEST = nest({
             % Data          Expected YAML
             1.23,           "1.23"
@@ -84,6 +88,7 @@ classdef Tests < matlab.unittest.TestCase
             int32(ones(2, 1, 2)),           sprintf("- - [1, 1]\n- - [1, 1]")
         })
 
+        % Parameters for testing consistency of dumping and reloading.
         DUMP_RELOAD_TEST = {
             @() buildRandomFloat
             @() logical(randi(2)-1)
@@ -97,16 +102,17 @@ classdef Tests < matlab.unittest.TestCase
             @() uint64(randi(2^8))
             @() buildRandomString()
         }
-
         DUMP_RELOAD_TEST_NUM_DIM = {0, 1, 2, 3, 4};
         DUMP_RELOAD_TEST_INDEX = num2cell(1:2);
 
+        % Parameters for testing errors of 'yaml.dump'.
         INVALID_DUMP_DATA = nest({
             % Data                      Expected error
             num2cell(ones(2, 2, 2, 2)), "yaml:dump:HigherDimensionsNotSupported"
             datetime(2022, 2, 13),      "yaml:dump:TypeNotSupported"
         });
 
+        % Parameters of testing dumping of integer types.
         INTEGER_TYPE = {"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64"}
         INTEGER_LIMIT_FUNCTION = {@intmin, @intmax}
 
