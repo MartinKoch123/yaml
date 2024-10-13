@@ -19,7 +19,7 @@ function result = loadFile(filePath, options)
 %       String                     | string
 %       Date (yyyy-mm-ddTHH:MM:SS) | datetime
 %       Date (yyyy-mm-dd)          | datetime
-%       null                       | yaml.Null
+%       null                       | 0-by-0 double
 %
 %   Example:
 %       >> DATA.a = 1

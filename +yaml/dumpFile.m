@@ -16,7 +16,7 @@ function dumpFile(filePath, data, style)
 %       scalar logical       | Boolean
 %       scalar string        | String
 %       char vector          | String
-%       scalar yaml.Null     | null
+%       any 0-by-0 value     | null
 %
 %   Example:
 %       >> DATA.a = 1
