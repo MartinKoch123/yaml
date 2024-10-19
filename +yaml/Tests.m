@@ -22,6 +22,7 @@ classdef Tests < matlab.unittest.TestCase
 
             % Test mixed types.
             "[1, 2, True, test]",   {1; 2; true; "test"}
+            sprintf("- - [1.0, a]\n  - null\n- {f1: 1.0}\n- [1.0, 2.0, true]"), {{{1; "a"}; []}; str("f1", 1); {1; 2; true}} 
 
             % Test maps.
             sprintf("a: test\nb: 123\nc:\n  d: test2\n  e: False"), str("a", "test", "b", 123, "c", str("d", "test2", "e", false))
@@ -86,10 +87,11 @@ classdef Tests < matlab.unittest.TestCase
             cell(1, 0),    "[]"
             num2cell(int32(ones(2, 2, 2))), sprintf("- - [1, 1]\n  - [1, 1]\n- - [1, 1]\n  - [1, 1]")
             int32(ones(2, 1, 2)),           sprintf("- - [1, 1]\n- - [1, 1]")
+            {{{1, "a"}, []}, str("f1", 1), {1, 2, true}}, sprintf("- - [1.0, a]\n  - null\n- {f1: 1.0}\n- [1.0, 2.0, true]")
         })
 
         % Parameters for testing consistency of dumping and reloading.
-        DUMP_RELOAD_TEST = {
+        DUMP_RELOAD_TEST_DATA_GENERATOR = {
             @() buildRandomFloat
             @() logical(randi(2)-1)
             @() randi(2^8, "uint8")
@@ -103,7 +105,7 @@ classdef Tests < matlab.unittest.TestCase
             @() buildRandomString()
         }
         DUMP_RELOAD_TEST_NUM_DIM = {0, 1, 2, 3, 4};
-        DUMP_RELOAD_TEST_INDEX = num2cell(1:2);
+        DUMP_RELOAD_TEST_INDEX = num2cell(1:3);
 
         % Parameters for testing errors of 'yaml.dump'.
         INVALID_DUMP_DATA = nest({
@@ -116,6 +118,12 @@ classdef Tests < matlab.unittest.TestCase
         INTEGER_TYPE = {"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64"}
         INTEGER_LIMIT_FUNCTION = {@intmin, @intmax}
 
+    end
+
+    methods (TestClassSetup)
+        function initRng(testCase)
+            rng(0)
+        end
     end
 
     methods (Test)
@@ -151,7 +159,7 @@ classdef Tests < matlab.unittest.TestCase
             testCase.verifyEqual(actual, expected);
         end
 
-        function dumpReload(testCase, DUMP_RELOAD_TEST, DUMP_RELOAD_TEST_NUM_DIM, DUMP_RELOAD_TEST_INDEX)
+        function dumpReloadUniformData(testCase, DUMP_RELOAD_TEST_DATA_GENERATOR, DUMP_RELOAD_TEST_NUM_DIM, DUMP_RELOAD_TEST_INDEX)
             % Assert that dumping and reloading does not change the data. 
             % Exception: Integers are loaded as doubles.
 
@@ -161,7 +169,7 @@ classdef Tests < matlab.unittest.TestCase
             % Create N-D array of random values.
             nDims = DUMP_RELOAD_TEST_NUM_DIM;
             numElements = DIM_SIZE^DUMP_RELOAD_TEST_NUM_DIM;
-            original = arrayfun(@(x) DUMP_RELOAD_TEST(), zeros(numElements, 1));
+            original = arrayfun(@(x) DUMP_RELOAD_TEST_DATA_GENERATOR(), zeros(numElements, 1));
             if nDims > 0
                 if nDims == 1
                     size_ = [DIM_SIZE, 1];
@@ -178,18 +186,6 @@ classdef Tests < matlab.unittest.TestCase
                 original = double(original);
             end
             testCase.verifyEqual(loaded, original)
-        end
-
-        function dump_3dcell(testCase)
-            data = num2cell(ones(2, 2, 2));
-            data{1, 1, 2} = "a";
-            data{1, 2, 1} = [];
-            data{2, 1, 1} = {1, 2};
-
-            expected = sprintf("- - [1.0, a]\n  - [null, 1.0]\n- - - [1.0, 2.0]\n    - 1.0\n  - [1.0, 1.0]\n");
-
-            actual = yaml.dump(data);
-            testCase.verifyEqual(actual, expected);
         end
 
         function dump_unsupportedTypes(testCase, INVALID_DUMP_DATA)
