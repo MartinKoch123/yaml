@@ -64,28 +64,27 @@ YAML `null` values are represented by empty Matlab arrays of any type with *all*
      "
 ```
 
-### Load YAML sequences as MATLAB standard arrays
-By default, sequences are loaded as nested cell arrays to distinguish between YAML scalars and YAML one-element sequences and to supported mixed type sequences. If you use the `ConvertToArray` option, sequences are converted to standard arrays if possible:
+### Load as array
+Use the `ConvertToArray` option to convert uniform YAML sequences to MATLAB non-cell arrays.
 ```Matlab
+>> yaml.load("[[1, 2], [3, 4]]")
+    2×1 cell array
+
+      {2×1 cell}
+      {2×1 cell}
+
 >> yaml.load("[[1, 2], [3, 4]]", "ConvertToArray", true)
-     1     2
-     3     4
+    1     2
+    3     4
 ```
 
-### Control dumping behaviour for MATLAB arrays
-Since every MATLAB scalar is always an array and every array technically has at least 2 dimensions, there exists two ambiguities when dumping arrays:
-- *MATLAB scalar* &rarr; *YAML scalar* (default) or *YAML one-element sequence*
-- *MATLAB vector* &rarr; *YAML sequence* (default) or *YAML sequence containing one YAML sequence*
+### Unexpected behaviour for array data
 
-To avoid theses ambiguities and get consistent conversion behaviour, convert all your array data to **nested vector cells** before dumping them.
-```Matlab
->> yaml.dump({1})
-    "[1.0]
-    "
->> yaml.dump({{1; 2}})
-    "- [1.0, 2.0]
-    "
-```
+In MATLAB, there is no difference between a scalar and a one-element sequence. This can lead to unintended behaviour when using standard non-cell arrays since information about the data structure can be lost when loading and dumping data. For example, `yaml.dump(1)` will write the YAML string `"1.0"` even though you might have intended to write a sequence with one element `"[1.0]"`. 
+
+To avoid these ambiguities
+ - convert all you array data to _nested vector cells_ before dumping and
+ - load all data _without_ the `ConvertToArray` option.
 
 ## Contributors
 
