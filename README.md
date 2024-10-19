@@ -6,39 +6,39 @@
 ## Examples
 ### Load and dump
 ```Matlab
->> data.a = [1.23, 4.56];
->> data.b = {int32(2), {true, "hello", yaml.Null}};
+>> matlabData.a = [1.23; 4.56];
+>> matlabData.b = {int32(2), {true, "hello", []}};
 
->> s = yaml.dump(data)
+>> yamlString = yaml.dump(matlabData)
     "a: [1.23, 4.56]
      b:
      - 2
      - [true, hello, null]
      "
    
->> result = yaml.load(s)
-    a: {[1.2300]  [4.5600]}
-    b: {[2]  {1×3 cell}}
+>> matlabData = yaml.load(yamlString)
+    a: {[1.2300]; [4.5600]}
+    b: {[2]; {3×1 cell}}
 ```
 
 ### Read and write files
 ```Matlab
->> yaml.dumpFile("test.yaml", data)
->> result = yaml.loadFile("test.yaml")
-    a: {[1.2300]  [4.5600]}
-    b: {[2]  {1×3 cell}}
+>> yaml.dumpFile("test.yaml", matlabData)
+>> matlabData = yaml.loadFile("test.yaml")
+    a: {[1.2300]; [4.5600]}
+    b: {[2]; {3×1 cell}}
 ```
 
 ### Styles
 ```Matlab
->> s = yaml.dump(data, "auto")  % default
+>> yamlString = yaml.dump(matlabData, "auto")  % default
     "a: [1.23, 4.56]
      b:
      - 2
      - [true, hello, null]
      "
      
->> s = yaml.dump(data, "block")
+>> yamlString = yaml.dump(matlabData, "block")
     "a: 
      - 1.23
      - 4.56
@@ -49,25 +49,23 @@
        - null
      "
      
->> s = yaml.dump(data, "flow")
+>> yamlString = yaml.dump(matlabData, "flow")
     "{a: [1.23, 4.56], b: [2, [true, hello, 'null']], c: [2, [true, hola]]}
      "
 ```
 ### YAML null
+YAML `null` values are represented by empty Matlab arrays of any type with *all* sizes equal zero.
 ```Matlab
 >> result = yaml.load("null")
-    Null
+    []
     
->> yaml.isNull(result)
-   1
-   
->> s = yaml.dump(yaml.Null)
+>> s = yaml.dump([])
     "null
      "
 ```
 
 ### Load YAML sequences as MATLAB standard arrays
-By default, sequences are loaded as nested cell arrays to distinguish between YAML scalars and YAML one-element sequences and to supported mixed type sequences. If you use the `ConvertToArray` option, sequences are converted to 1D or 2D standard arrays if possible:
+By default, sequences are loaded as nested cell arrays to distinguish between YAML scalars and YAML one-element sequences and to supported mixed type sequences. If you use the `ConvertToArray` option, sequences are converted to standard arrays if possible:
 ```Matlab
 >> yaml.load("[[1, 2], [3, 4]]", "ConvertToArray", true)
      1     2
@@ -84,8 +82,13 @@ To avoid theses ambiguities and get consistent conversion behaviour, convert all
 >> yaml.dump({1})
     "[1.0]
     "
->> yaml.dump({{1, 2}})
+>> yaml.dump({{1; 2}})
     "- [1.0, 2.0]
     "
 ```
 
+## Contributors
+
+Thanks to the following people for their contributions:
+
+- **[Adam Cooman](https://github.com/AdamCooman)**
