@@ -121,14 +121,16 @@ function result = convertIntegerOrLogical(data)
     if isvector(data)
 
         % Dump MATLAB vectors (i.e. 2-D arrays where one dimension has size 1) as a sequences.
-        size_ = numel(data);
+        size_ = [numel(data) 1];
+        nDims = 1;
+        result = javaArray("java." + javaType, numel(data));
     else
 
         % Dump MATLAB non-vector, non-scalar arrays as nested sequences.
         size_ = size(data);
+        nDims = length(size_);
+        result = javaArray("java." + javaType, size_);
     end
-    nDims = length(size_);
-    result = javaArray("java." + javaType, size_);
 
     % Loop over elements in N-D array via linear indexing.
     for i = 1 : numel(data)
