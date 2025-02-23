@@ -114,19 +114,27 @@ function result = convertIntegerOrLogical(data)
     % Dump MATLAB scalars (i.e. 2-D arrays with one element) as scalars.
     if isscalar(data)
         result = converter(data);
-        return
-    end
 
-    % Create Java array.
-    if isvector(data)
+    % Dump MATLAB vectors (i.e. 2-D arrays where one dimension has size 1) as a sequences.
+    elseif isvector(data)
+        result = convertIntegerOrLogical_vector(data, javaType, converter);
 
-        % Dump MATLAB vectors (i.e. 2-D arrays where one dimension has size 1) as a sequences.
-        size_ = numel(data);
+    % Dump MATLAB non-vector, non-scalar arrays as nested sequences.
     else
-
-        % Dump MATLAB non-vector, non-scalar arrays as nested sequences.
-        size_ = size(data);
+        result = convertIntegerOrLogical_array(data, javaType, converter);
     end
+end
+
+function result = convertIntegerOrLogical_vector(data, javaType, converter)
+    nValues = numel(data);
+    result = javaArray("java." + javaType, nValues);
+    for i = 1 : nValues
+        result(i) = converter(data(i));
+    end
+end
+
+function result = convertIntegerOrLogical_array(data, javaType, converter)
+    size_ = size(data);
     nDims = length(size_);
     result = javaArray("java." + javaType, size_);
 
