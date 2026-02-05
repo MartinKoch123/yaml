@@ -1,36 +1,70 @@
 function result = load(s, options)
-%YAML.LOAD Parse YAML string
-%   DATA = YAML.LOAD(STR) parses a YAML string STR and converts it to
-%   appropriate data types DATA.
+% Parse a YAML string into MATLAB data types.
 %
-%   DATA = YAML.LOAD(STR, "ConvertToArray", true) additionally converts
-%   sequences to 1D or 2D non-cell arrays if possible.
+%   :code:`result = yaml.load(s)` parses the YAML document contained in the string
+%   :code:`s` and converts it into MATLAB data types.
 %
-%   The YAML types are convert to MATLAB types as follows:
+%   :code:`result = yaml.load(s, options)` allows control over the conversion
+%   behavior using name-value options.
 %
-%       YAML type                  | MATLAB type
-%       ---------------------------|------------
-%       Sequence                   | cell or array if possible and
-%                                  | "ConvertToArray" is enabled
-%       Mapping                    | struct
-%       Floating-point number      | double
-%       Integer                    | double
-%       Boolean                    | logical
-%       String                     | string
-%       Date (yyyy-mm-ddTHH:MM:SS) | datetime
-%       Date (yyyy-mm-dd)          | datetime
-%       null                       | 0-by-0 double
+%   Parameters
+%   ----------
+%   s : string (1x1)
+%     YAML document to be parsed, provided as a string.
 %
-%   Example:
-%       >> STR = "{a: 1, b: [text, false]}";
-%       >> DATA = yaml.load(STR)
+%   options.ConvertToArray : logical, default = false
+%     If true, YAML sequences are converted to non-cell MATLAB arrays whenever
+%     possible. For example, :code:`result = yaml.load(s, 'ConvertToArray', true)`
+%     or :code:`result = yaml.load(s, ConvertToArray=true)`.
 %
-%         struct with fields:
-%           a: 1
-%           b: {["text"]  [0]}
+%   Returns
+%   -------
+%   result : struct, array, cell or scalar
+%     MATLAB representation of the parsed YAML document, with types inferred
+%     from the YAML content.
 %
-%   See also YAML.LOADFILE, YAML.DUMP, YAML.DUMPFILE
-    
+%   Notes
+%   -----
+%   
+%   The following table summarizes the mapping from YAML types to MATLAB
+%   types:
+%
+%   +----------------------------+------------------------------------------+
+%   | YAML type                  | MATLAB type                              |
+%   +============================+==========================================+
+%   | Sequence                   | cell (or array if ConvertToArray = true) |
+%   +----------------------------+------------------------------------------+
+%   | Mapping                    | struct                                   |
+%   +----------------------------+------------------------------------------+
+%   | Floating-point number      | double                                   |
+%   +----------------------------+------------------------------------------+
+%   | Integer                    | double                                   |
+%   +----------------------------+------------------------------------------+
+%   | Boolean                    | logical                                  |
+%   +----------------------------+------------------------------------------+
+%   | String                     | string                                   |
+%   +----------------------------+------------------------------------------+
+%   | Date (yyyy-mm-ddTHH:MM:SS) | datetime                                 |
+%   +----------------------------+------------------------------------------+
+%   | Date (yyyy-mm-dd)          | datetime                                 |
+%   +----------------------------+------------------------------------------+
+%   | null                       | 0-by-0 double                            |
+%   +----------------------------+------------------------------------------+
+%
+%   Examples
+%   --------
+%   >>> str = "{a: 1, b: [text, false]}";
+%   >>> result = yaml.load(str)
+%     struct with fields:
+%       a: 1
+%       b: {["text"]  [0]}
+%
+%   See Also
+%   --------
+%   yaml.loadFile
+%   yaml.dump
+%   yaml.dumpFile
+ 
 arguments
     s (1, 1) string
     options.ConvertToArray (1, 1) logical = false

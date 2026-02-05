@@ -1,40 +1,78 @@
 function result = dump(data, style)
-%DUMP Convert data to YAML string
-%   STR = YAML.DUMP(DATA) converts DATA to a YAML string STR.
+% Serialize MATLAB data to a YAML string.
 %
-%   STR = YAML.DUMP(DATA, STYLE) uses a specific output style.
-%   STYLE can be "auto" (default), "block" or "flow".
+%   :code:`result = yaml.dump(data)` converts a MATLAB variable :code:`data`
+%   into a YAML-formatted string.
 %
-%   The following types are supported for DATA:
-%       MATLAB type             | YAML type
-%       ------------------------|----------------------
-%       1D cell array           | Sequence
-%       1D non-scalar array     | Sequence
-%       2D/3D cell array        | Nested sequences
-%       2D/3D non-scalar array  | Nested sequences
-%       struct                  | Mapping
-%       scalar single/double    | Floating-point number
-%       scalar int8/../int64    | Integer
-%       scalar uint8/../uint64  | Integer
-%       scalar logical          | Boolean
-%       scalar string           | String
-%       char vector             | String
-%       any 0-by-0 value        | null
+%   :code:`result = yaml.dump(data, style)` applies a specific YAML formatting
+%   style.
+%
+%   Parameters
+%   ----------
+%   data : any
+%     The MATLAB variable to be serialized.
+%
+%   style: {'auto', 'block', 'flow'}, default = 'auto'
+%     Output style for YAML sequences and mappings:
+%       - 'auto' (default) : Automatically choose best fit.
+%       - 'block' : Human-readable multi-line (standard YAML).
+%       - 'flow' : Compact inline style (JSON-like).
+%
+%   Returns
+%   -------
+%   result : string
+%     A string containing the serialized YAML document.
+%
+%   Notes
+%   -----
+%   The following table describes how MATLAB types are translated to YAML:
+%
+%   +------------------------+-----------------------+
+%   | MATLAB type            | YAML type             |
+%   +========================+=======================+
+%   | 1D cell array          | Sequence              |
+%   +------------------------+-----------------------+
+%   | 1D non-scalar array    | Sequence              |
+%   +------------------------+-----------------------+
+%   | 2D/3D cell array       | Nested sequences      |
+%   +------------------------+-----------------------+
+%   | 2D/3D non-scalar array | Nested sequences      |
+%   +------------------------+-----------------------+
+%   | struct                 | Mapping               |
+%   +------------------------+-----------------------+
+%   | scalar single/double   | Floating-point number |
+%   +------------------------+-----------------------+
+%   | scalar int8/../int64   | Integer               |
+%   +------------------------+-----------------------+
+%   | scalar uint8/../uint64 | Integer               |
+%   +------------------------+-----------------------+
+%   | scalar logical         | Boolean               |
+%   +------------------------+-----------------------+
+%   | scalar string          | String                |
+%   +------------------------+-----------------------+
+%   | char vector            | String                |
+%   +------------------------+-----------------------+
+%   | any 0-by-0 value       | null                  |
+%   +------------------------+-----------------------+
 %
 %   Array conversion can be ambiguous. To ensure consistent conversion
 %   behaviour, consider manually converting array data to nested 1D cells
 %   before converting it to YAML.
 %
-%   Example:
-%       >> DATA.a = 1
-%       >> DATA.b = {"hello", false}
-%       >> STR = yaml.dump(DATA)
+%   Examples
+%   --------
+%   >>> data.a = 1;
+%   >>> data.b = {"hello", false};
+%   >>> str = yaml.dump(data)
+%     "a: 1.0
+%     b: [hello, false]
+%     "
 %
-%         "a: 1.0
-%         b: [hello, false]
-%         "
-%
-%   See also YAML.DUMPFILE, YAML.LOAD, YAML.LOADFILE
+%   See Also
+%   --------
+%   yaml.load
+%   yaml.loadFile
+%   yaml.dumpFile
 
 arguments
     data

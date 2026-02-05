@@ -1,36 +1,74 @@
 function dumpFile(filePath, data, style)
-% DUMPFILE Write data to YAML file.
-%   YAML.DUMPFILE(FILE, DATA) converts DATA to YAML and saves it in a new
-%   file FILE.
+% Serialize MATLAB data to a YAML file.
 %
-%   YAML.DUMPFILE(FILE, DATA, STYLE) uses a specific output style.
-%   STYLE can be "auto" (default), "block" or "flow".
+%   :code:`yaml.dumpFile(filePath, data)` serializes MATLAB variable :code:`data`
+%   to a YAML document and writes it to the file specified by :code:`filePath`.
 %
-%   The following types are supported for DATA:
-%       MATLAB type          | YAML type
-%       ---------------------|----------------------
-%       vector cell array    | Sequence
-%       struct               | Mapping
-%       scalar single/double | Floating-point number
-%       scalar int8/../int64 | Integer
-%       scalar logical       | Boolean
-%       scalar string        | String
-%       char vector          | String
-%       any 0-by-0 value     | null
+%   :code:`yaml.dumpFile(filePath, data, style)` specifies the YAML formatting 
+%   style.
 %
-%   Example:
-%       >> DATA.a = 1
-%       >> DATA.b = {"text", false}
-%       >> FILE = ".\test.yaml"
-%       >> yaml.dumpFile(FILE, DATA)
-%       >> yaml.loadFile("test.yaml")
+%   Parameters
+%   ----------
+%   filePath : string
+%     Path of the YAML file to write. Parent directories are created
+%     automatically if they do not exist.
 %
-%         struct with fields:
+%   data : any
+%     The MATLAB variable to be serialized.
 %
-%           a: 1
-%           b: {["text"]  [0]}
+%   style: {'auto', 'block', 'flow'}, default='auto'
+%     Output style for YAML sequences and mappings:
+%       - 'auto' (default) : Automatically choose best fit.
+%       - 'block' : Human-readable multi-line (standard YAML).
+%       - 'flow' : Compact inline style (JSON-like).
 %
-%   See also YAML.DUMP, YAML.LOAD, YAML.LOADFILE, YAML.ISNULL
+%   Notes
+%   -----
+%   The following MATLAB types are supported and mapped to YAML types:
+%
+%   +------------------------+-----------------------+
+%   | MATLAB type            | YAML type             |
+%   +========================+=======================+
+%   | 1D cell array          | Sequence              |
+%   +------------------------+-----------------------+
+%   | 1D non-scalar array    | Sequence              |
+%   +------------------------+-----------------------+
+%   | 2D/3D cell array       | Nested sequences      |
+%   +------------------------+-----------------------+
+%   | 2D/3D non-scalar array | Nested sequences      |
+%   +------------------------+-----------------------+
+%   | struct                 | Mapping               |
+%   +------------------------+-----------------------+
+%   | scalar single/double   | Floating-point number |
+%   +------------------------+-----------------------+
+%   | scalar int8/../int64   | Integer               |
+%   +------------------------+-----------------------+
+%   | scalar uint8/../uint64 | Integer               |
+%   +------------------------+-----------------------+
+%   | scalar logical         | Boolean               |
+%   +------------------------+-----------------------+
+%   | scalar string          | String                |
+%   +------------------------+-----------------------+
+%   | char vector            | String                |
+%   +------------------------+-----------------------+
+%   | any 0-by-0 value       | null                  |
+%   +------------------------+-----------------------+
+%
+%   Array conversion can be ambiguous. To ensure consistent conversion
+%   behaviour, consider manually converting array data to nested 1D cells
+%   before converting it to YAML.
+%
+%   Examples
+%   --------
+%   >>> data.a = 1;
+%   >>> data.b = {"text", false};
+%   >>> yaml.dumpFile("test.yaml", data);
+%
+%   See Also
+%   --------
+%   yaml.load
+%   yaml.loadFile
+%   yaml.dump
 
 arguments
     filePath (1, 1) string

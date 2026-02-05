@@ -1,10 +1,20 @@
 # yaml
+
+<p align="center">
+  <a href="https://www.mathworks.com/matlabcentral/fileexchange/106765-yaml"><img src="https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg" alt="View yaml on File Exchange"></a>
+  <img src="https://img.shields.io/readthedocs/yaml-matlab" alt="Documentation build status">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license">
+</p>
+
 [YAML 1.1](https://yaml.org/spec/1.1/) parser and emitter for MATLAB R2019b or newer. Based on [SnakeYAML 1.30](https://bitbucket.org/snakeyaml/snakeyaml/src/master/).
 
-[![View yaml on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/106765-yaml)
+  - [Documentation](https://yaml-matlab.readthedocs.io/en/latest/)
+  - [MATLAB File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/106765-yaml)
 
 ## Examples
+
 ### Load and dump
+
 ```Matlab
 >> matlabData.a = [1.23; 4.56];
 >> matlabData.b = {int32(2), {true, "hello", []}};
@@ -22,6 +32,7 @@
 ```
 
 ### Read and write files
+
 ```Matlab
 >> yaml.dumpFile("test.yaml", matlabData)
 >> matlabData = yaml.loadFile("test.yaml")
@@ -30,6 +41,7 @@
 ```
 
 ### Styles
+
 ```Matlab
 >> yamlString = yaml.dump(matlabData, "auto")  % default
     "a: [1.23, 4.56]
@@ -53,8 +65,11 @@
     "{a: [1.23, 4.56], b: [2, [true, hello, 'null']], c: [2, [true, hola]]}
      "
 ```
+
 ### YAML null
+
 YAML `null` values are represented by empty Matlab arrays of any type with *all* sizes equal zero.
+
 ```Matlab
 >> result = yaml.load("null")
     []
@@ -65,7 +80,9 @@ YAML `null` values are represented by empty Matlab arrays of any type with *all*
 ```
 
 ### Load as array
+
 Use the `ConvertToArray` option to convert uniform YAML sequences to MATLAB non-cell arrays.
+
 ```Matlab
 >> yaml.load("[[1, 2], [3, 4]]")
     2×1 cell array
@@ -91,3 +108,4 @@ To avoid these ambiguities
 Thanks to the following people for their contributions:
 
 - **[Adam Cooman](https://github.com/AdamCooman)**
+- **[Fernando N. Santos-Navarro](https://github.com/fernandonobel)** (documentation)
